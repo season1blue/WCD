@@ -1,7 +1,9 @@
 task_to_image_path = {
     "aokvqa": "./data/aokvqa/images",
     "gqa": "/ai/teacher/ssz/all_data/mqa/GQA/images",
-    "textvqa": "./data/textvqa/images",
+    "mvsa_m": "/ai/teacher/ssz/all_data/msa/MVSA_Multiple/data",
+    "mvsa_s": "/ai/teacher/ssz/all_data/msa/MVSA_Single/data",
+    "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/train_val",
     "docvqa": "./data/docvqa/images",
     "pope": "./data/pope/images",
     "vstar": "./data/vstar/images",
@@ -11,7 +13,9 @@ task_to_image_path = {
 task_to_question_path = {
     "aokvqa": "./data/aokvqa/data.json",
     "gqa": "/ai/teacher/ssz/all_data/mqa/GQA/jsons/balanced_evalset_list.json",
-    "textvqa": "./data/textvqa/data.json",
+    "mvsa_m": "/ai/teacher/ssz/all_data/msa/MVSA_Multiple/test.json",
+    "mvsa_s": "/ai/teacher/ssz/all_data/msa/MVSA_Single/test.json",
+    "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/processed/val.json",
     "docvqa": "./data/docvqa/data.json",
     "pope": "./data/pope/data.json",
     "vstar": "./data/vstar/data.json",

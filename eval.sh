@@ -1,3 +1,3 @@
-python get_score.py \
-    --data_dir ./playground/data/results \
+python utils/get_score.py \
+    --data_dir ./results \
     --save_path ./

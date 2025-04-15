@@ -181,9 +181,31 @@ def evaluate_gqa(datas):
     
     raw_acc, crop_acc = 0, 0
     for data in tqdm(datas):
+        raw_answer = data['original_answer'][0]
+        crop_answer = data['crop_answer'][0]
+        answers = [data['answer']][0]
+        print(data)
+
+        raw_acc = get_acc_gqa(raw_answer, answers)
+        crop_acc = get_acc_gqa(crop_answer, answers)
+        print(raw_answer, crop_answer, answers)
+        print(raw_acc, crop_acc)
+        
+        exit()
+        raw_accs.append(raw_acc)
+        crop_accs.append(crop_acc)
+
+    return sum(raw_accs) / len(raw_accs), sum(crop_accs) / len(crop_accs)
+
+def evaluate_mvsa(datas):
+    raw_accs = []
+    crop_accs = []
+    
+    raw_acc, crop_acc = 0, 0
+    for data in tqdm(datas):
         raw_answer = data['original_answer']
         crop_answer = data['crop_answer']
-        answers = [data['answer']]
+        answers = data['answer']
 
         raw_acc = get_acc_gqa(raw_answer, answers)
         crop_acc = get_acc_gqa(crop_answer, answers)
@@ -219,7 +241,9 @@ def main(args):
     json_files = sorted(json_files)
 
     for json_file in json_files:
+        print(json_file)
         filepath = os.path.join(args.data_dir, json_file)
+        print(filepath)
         model_name, task, method = json_file.replace('.json', '').split('-')
 
         with open(filepath, 'r') as f:
@@ -235,8 +259,10 @@ def main(args):
             raw_acc, crop_acc = evaluate_aokvqa(datas)
         elif task == 'vqav2':
             raw_acc, crop_acc = evaluate_vqav2(datas)
-        elif task == 'gqa':
+        elif task == "gqa":
             raw_acc, crop_acc = evaluate_gqa(datas)
+        elif task in ["mvsa_m", "mvsa_s"]:
+            raw_acc, crop_acc = evaluate_mvsa(datas)
         elif task == 'docvqa':
             raw_acc, crop_acc = evaluate_docvqa(datas)
         else:
@@ -294,6 +320,8 @@ if __name__ == "__main__":
 
     args.methods = ['nocrop', 'rel_att', 'grad_att', 'grad', 'rel_att_high', 'grad_att_high', 'grad_high']
 
-    args.tasks = ['textvqa', 'vstar', 'gqa', 'pope', 'aokvqa', 'docvqa', 'chartqa', 'infoqa']
+    # args.tasks = ['textvqa', 'vstar', 'pope', 'aokvqa', 'docvqa', 'chartqa', 'infoqa', 'mvsa_m', 'mvsa_s', 'gqa']
+    args.tasks = ['textvqa']
+    
 
     main(args)

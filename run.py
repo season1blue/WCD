@@ -8,14 +8,14 @@ from tqdm import tqdm
 import json
 from datasets import load_dataset
 
-from llava_methods import *
-from blip_methods import *
-from qwen2_5_methods import *
-from utils import *
-from info import *
+from methods.llava_methods import *
+from methods.blip_methods import *
+from methods.qwen2_5_methods import *
+from utils.utils import *
+from utils.info import *
 
-from llava_methods import bbox_from_att_image_adaptive
-from utils import high_res
+# from methods.llava_methods import bbox_from_att_image_adaptive
+# from utils.utils import high_res
 
 def vicrop_qa(model_name, method_name, image_path, question, model, processor, short_question):
     """
@@ -178,6 +178,12 @@ def vicrop_qa(model_name, method_name, image_path, question, model, processor, s
         return ori_generation, multi_generation, bbox, num_img_tokens
         
 
+
+
+import ipdb
+from utils.dataset import ImageTextDataset
+from torch.utils.data import Dataset, DataLoader
+
 def main(args):
     """
     Main function to run the visual cropping and question answering pipeline.
@@ -216,33 +222,46 @@ def main(args):
         processor.image_processor.size["longest_edge"] = max_pixels # this is likely a bug in current transformers (4.50.0) library, passing in max_pixels to from_pretrained does not work
     
     
-    if os.path.exists(args.question_path):
-        with open(args.question_path, "r") as f:
-            whole_data = json.load(f)
-    else:
-        whole_data = list(load_dataset(args.question_path)['test'])
-    
-    whole_data = whole_data[:500]
+    # if os.path.exists(args.question_path):
+    #     with open(args.question_path, "r") as f:
+    #         whole_data = json.load(f)
+    # else:
+    #     whole_data = list(load_dataset(args.question_path)['test'])
+    # whole_data = whole_data[:500]
 
-    for d in whole_data:
-        d["image_path"] = os.path.join(args.image_path, d["image_path"]) if "image_path" in d else os.path.join(args.image_path, f"{d['image_id']}.jpg")
+
+    # for d in whole_data:
+    #     d["image_path"] = os.path.join(args.image_path, d["image_path"]) if "image_path" in d else os.path.join(args.image_path, f"{d['image_id']}.jpg")
+
+    dataset = ImageTextDataset(
+        task=args.task,
+        question_path=args.question_path,
+        image_path=args.image_path,
+        max_samples=None
+    )
+    dataloader = DataLoader(
+        dataset,
+        batch_size=1,
+        shuffle=False,
+        pin_memory=True
+    )
 
     new_datas = []
 
-    for d in tqdm(whole_data, desc="Processing", ncols=100):
+    for d in tqdm(dataloader, desc="Processing", ncols=100, disable=False):
+        question = d["text"][0]
+        image_path = d["image_path"][0]
+        short_question = d["short_question"] if 'short_question' in d else question
 
-        question = d["question"]
-        image_path = d["image_path"]
-        if 'short_question' in d:
-            short_question = d["short_question"]
-        else:
-            short_question = d["question"]
-
-        if args.model == "qwen2_5":
-            ori_generation, crop_generation, bbox, num_img_tokens = vicrop_qa(args.model, args.method, image_path, question, model, processor, short_question)
-            d["num_img_tokens"] = int(num_img_tokens)
-        else:
-            ori_generation, crop_generation, bbox = vicrop_qa(args.model, args.method, image_path, question, model, processor, short_question)
+        try:
+            if args.model == "qwen2_5":
+                ori_generation, crop_generation, bbox, num_img_tokens = vicrop_qa(args.model, args.method, image_path, question, model, processor, short_question)
+                d["num_img_tokens"] = int(num_img_tokens)
+            else:
+                ori_generation, crop_generation, bbox = vicrop_qa(args.model, args.method, image_path, question, model, processor, short_question)
+        except Exception as e:
+            print(f"[Warning] Failed on sample {d.get('qid', 'unknown')} with error: {e}")
+            continue
 
         d["original_answer"] = ori_generation
         d["crop_answer"] = crop_generation
@@ -254,10 +273,11 @@ def main(args):
     if not os.path.exists(out_put_dir):
         os.makedirs(out_put_dir)
 
-    if os.path.exists(args.output_path):
-        with open(args.output_path, "r") as f:
-            old_datas = json.load(f)
-        new_datas = old_datas + new_datas
+    # 将之前的result中的old_data重新拿出来
+    # if os.path.exists(args.output_path):
+    #     with open(args.output_path, "r") as f:
+    #         old_datas = json.load(f)
+    #     new_datas = old_datas + new_datas
     
     with open(args.output_path, "w") as f:
         json.dump(new_datas, f, indent=4)
@@ -268,7 +288,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, default="llava", choices=model_to_fullname.keys())
     parser.add_argument("--task", type=str, default="textvqa", choices=task_to_question_path.keys())
     parser.add_argument("--method", type=str, default="new", choices=["rel_att", "pure_grad", "grad_att", "grad", "rel_att_high", "pure_grad_high", "grad_att_high", "grad_high"])
-    parser.add_argument("--save_path", type=str, default="./playground/data/results")
+    parser.add_argument("--save_path", type=str, default="./results")
     parser.add_argument("--total_chunks", type=int, default=1)
     parser.add_argument("--chunk_id", type=int, default=0)
     args = parser.parse_args()
