@@ -178,10 +178,12 @@ def evaluate_vqav2(datas):
 def evaluate_gqa(datas):
     raw_accs = []
     crop_accs = []
+    
+    raw_acc, crop_acc = 0, 0
     for data in tqdm(datas):
         raw_answer = data['original_answer']
         crop_answer = data['crop_answer']
-        answers = data['labels']
+        answers = [data['answer']]
 
         raw_acc = get_acc_gqa(raw_answer, answers)
         crop_acc = get_acc_gqa(crop_answer, answers)
@@ -277,8 +279,9 @@ def main(args):
         if df1.loc[row, task] == '':
             df1.loc[row, task] = f"{crop_acc:.2f}"
 
-    csv_path = os.path.join(args.save_path, 'evaluation_report.csv')
-    df1.to_csv(csv_path, sep='\t')
+    # 保存到csv中
+    # csv_path = os.path.join(args.save_path, 'evaluation_report.csv')
+    # df1.to_csv(csv_path, sep='\t')
 
 
 if __name__ == "__main__":

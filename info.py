@@ -1,6 +1,6 @@
 task_to_image_path = {
     "aokvqa": "./data/aokvqa/images",
-    "gqa": "./data/gqa/images",
+    "gqa": "/ai/teacher/ssz/all_data/mqa/GQA/images",
     "textvqa": "./data/textvqa/images",
     "docvqa": "./data/docvqa/images",
     "pope": "./data/pope/images",
@@ -10,7 +10,7 @@ task_to_image_path = {
 
 task_to_question_path = {
     "aokvqa": "./data/aokvqa/data.json",
-    "gqa": "./data/gqa/data.json",
+    "gqa": "/ai/teacher/ssz/all_data/mqa/GQA/jsons/balanced_evalset_list.json",
     "textvqa": "./data/textvqa/data.json",
     "docvqa": "./data/docvqa/data.json",
     "pope": "./data/pope/data.json",

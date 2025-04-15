@@ -1,0 +1,9 @@
+[
+    {
+        "model_name": "llava",
+        "task": "gqa",
+        "method": "rel_att",
+        "raw_acc": 70.2,
+        "crop_acc": 71.8
+    }
+]

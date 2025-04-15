@@ -14,6 +14,9 @@ from qwen2_5_methods import *
 from utils import *
 from info import *
 
+from llava_methods import bbox_from_att_image_adaptive
+from utils import high_res
+
 def vicrop_qa(model_name, method_name, image_path, question, model, processor, short_question):
     """
     Performs visual cropping and question answering using different attention methods.
@@ -212,22 +215,21 @@ def main(args):
         processor = AutoProcessor.from_pretrained(args.model_id, max_pixels=max_pixels)
         processor.image_processor.size["longest_edge"] = max_pixels # this is likely a bug in current transformers (4.50.0) library, passing in max_pixels to from_pretrained does not work
     
+    
     if os.path.exists(args.question_path):
         with open(args.question_path, "r") as f:
             whole_data = json.load(f)
     else:
         whole_data = list(load_dataset(args.question_path)['test'])
     
-    for data in whole_data:
-        data["image_path"] = os.path.join(args.image_path, data["image_path"]) if "image_path" in data else os.path.join(args.image_path, f"{data['image_id']}.jpg")
+    whole_data = whole_data[:500]
 
-    splited_data = np.array_split(whole_data, args.total_chunks)
-
-    data = splited_data[args.chunk_id]
+    for d in whole_data:
+        d["image_path"] = os.path.join(args.image_path, d["image_path"]) if "image_path" in d else os.path.join(args.image_path, f"{d['image_id']}.jpg")
 
     new_datas = []
 
-    for d in tqdm(data, desc="Processing", ncols=100):
+    for d in tqdm(whole_data, desc="Processing", ncols=100):
 
         question = d["question"]
         image_path = d["image_path"]
