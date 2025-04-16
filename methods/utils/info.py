@@ -15,7 +15,7 @@ task_to_question_path = {
     "gqa": "/ai/teacher/ssz/all_data/mqa/GQA/jsons/balanced_evalset_list.json",
     "mvsa_m": "/ai/teacher/ssz/all_data/msa/MVSA_Multiple/test.json",
     "mvsa_s": "/ai/teacher/ssz/all_data/msa/MVSA_Single/test.json",
-    "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/processed/val.json",
+    "textvqa": "/ai/teacher/dkc/Assets/TextVQA/TextVQA_0.5.1_val.json",
     "docvqa": "./data/docvqa/data.json",
     "pope": "./data/pope/data.json",
     "vstar": "./data/vstar/data.json",

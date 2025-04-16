@@ -3,7 +3,7 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 from skimage.measure import block_reduce
-from utils import *
+from methods.utils import *
 
 # currently select 22 but feel free to try other layers
 ATT_LAYER = 22

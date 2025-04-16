@@ -1,1 +1,9 @@
-[]
+[
+    {
+        "model_name": "llava",
+        "task": "mvsa_s",
+        "method": "rel_att",
+        "raw_acc": 67.0,
+        "crop_acc": 66.0
+    }
+]

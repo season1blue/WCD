@@ -94,7 +94,7 @@ def evaluate_textvqa(datas):
     for data in tqdm(datas):
         raw_answer = data['original_answer']
         crop_answer = data['crop_answer']
-        answers = data['labels']
+        answers = data['answer']
 
         raw_acc = get_acc(raw_answer, answers)
         crop_acc = get_acc(crop_answer, answers)
@@ -210,6 +210,8 @@ def evaluate_mvsa(datas):
         raw_acc = get_acc_gqa(raw_answer, answers)
         crop_acc = get_acc_gqa(crop_answer, answers)
 
+        print(raw_answer, answers, raw_acc)
+        
         raw_accs.append(raw_acc)
         crop_accs.append(crop_acc)
 
@@ -321,7 +323,7 @@ if __name__ == "__main__":
     args.methods = ['nocrop', 'rel_att', 'grad_att', 'grad', 'rel_att_high', 'grad_att_high', 'grad_high']
 
     # args.tasks = ['textvqa', 'vstar', 'pope', 'aokvqa', 'docvqa', 'chartqa', 'infoqa', 'mvsa_m', 'mvsa_s', 'gqa']
-    args.tasks = ['textvqa']
+    args.tasks = ['mvsa_s']
     
 
     main(args)

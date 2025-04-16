@@ -3,7 +3,7 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 from skimage.measure import block_reduce
-from utils import *
+from methods.utils import *
 
 # hyperparameters
 NUM_IMG_TOKENS = 576
@@ -12,6 +12,17 @@ PATCH_SIZE = 14
 IMAGE_RESOLUTION = 336
 IMAGE_TOKEN_INDEX = 32000
 ATT_LAYER = 14
+
+PAD_TOKEN_INDEX = 32001
+
+# LlamaTokenizerFast(name_or_path='llava-hf/llava-1.5-7b-hf', vocab_size=32000, model_max_length=1000000000000000019884624838656, is_fast=True, padding_side='left', truncation_side='right', special_tokens={'bos_token': '<s>', 'eos_token': '</s>', 'unk_token': '<unk>', 'pad_token': '<pad>', 'image_token': '<image>'}, clean_up_tokenization_spaces=False, added_tokens_decoder={
+#         0: AddedToken("<unk>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+#         1: AddedToken("<s>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+#         2: AddedToken("</s>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+#         32000: AddedToken("<image>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+#         32001: AddedToken("<pad>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+# }
+# )
 
 def gradient_attention_llava(image, prompt, general_prompt, model, processor):
     """
@@ -53,6 +64,8 @@ def gradient_attention_llava(image, prompt, general_prompt, model, processor):
     
     return att_map
 
+
+
 def rel_attention_llava(image, prompt, general_prompt, model, processor):
     """
     Generates a relative attention map by comparing specific prompt attention to general prompt attention.
@@ -89,6 +102,46 @@ def rel_attention_llava(image, prompt, general_prompt, model, processor):
     att_map = att_map / general_att_map
 
     return att_map
+
+import ipdb
+
+def rel_attention_llava_text(image, prompt, general_prompt, model, processor):
+    # Prepare inputs for the prompt
+    inputs = processor(prompt, image, return_tensors="pt", padding=True)
+
+    inputs = inputs.to(model.device, torch.bfloat16)
+    
+    # text_begin_pos = inputs['input_ids'][0].tolist().index(IMAGE_TOKEN_INDEX)+1
+    input_ids = inputs['input_ids'][0].tolist()
+    last_image_token_idx = len(input_ids) - 1 - input_ids[::-1].index(IMAGE_TOKEN_INDEX)
+    text_begin_pos = last_image_token_idx + 1
+    # text_end_pos = inputs['input_ids'][0].tolist().index(PAD_TOKEN_INDEX)
+    
+    # Compute attention map for the 14th layer
+    att_map = model(**inputs, output_attentions=True)['attentions'][-1][0, :, -1, text_begin_pos:].mean(dim=0).to(torch.float32).detach().cpu().numpy()
+
+    text_ids = input_ids[text_begin_pos:]
+    # for i, t in enumerate(text_ids):
+    #     text_token = processor.decode(t)
+    #     print(text_token, att_map[i])
+        
+    
+    # # Prepare inputs for the general prompt
+    # general_inputs = processor(general_prompt, image, return_tensors="pt", padding=True).to(model.device, torch.bfloat16)
+    # general_text_begin_pos = general_inputs['input_ids'][0].tolist().index(IMAGE_TOKEN_INDEX)+1
+    # general_text_end_pos = general_inputs['input_ids'][0].tolist().index(PAD_TOKEN_INDEX)
+    
+    # # Compute general attention map for the 14th layer
+    # general_att_map = model(**general_inputs, output_attentions=True)['attentions'][ATT_LAYER][0, :, -1, general_text_begin_pos:general_text_end_pos].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(NUM_PATCHES, NUM_PATCHES)
+
+    # Normalize attention map
+    # att_map = att_map / general_att_map
+
+    return att_map
+
+
+
+
 
 def pure_gradient_llava(image, prompt, general_prompt, model, processor):
     """

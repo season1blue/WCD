@@ -2,7 +2,8 @@ import os
 from PIL import Image
 import torch
 import numpy as np
-from transformers import AutoProcessor, LlavaForConditionalGeneration, InstructBlipProcessor, InstructBlipForConditionalGeneration, Qwen2_5_VLForConditionalGeneration
+from transformers import AutoProcessor, InstructBlipProcessor, InstructBlipForConditionalGeneration, Qwen2_5_VLForConditionalGeneration, AutoConfig
+from methods.llava_model import MyLlava
 import argparse
 from tqdm import tqdm
 import json
@@ -11,8 +12,9 @@ from datasets import load_dataset
 from methods.llava_methods import *
 from methods.blip_methods import *
 from methods.qwen2_5_methods import *
-from utils.utils import *
-from utils.info import *
+from methods.utils.utils import *
+from methods.utils.info import *
+import ipdb
 
 # from methods.llava_methods import bbox_from_att_image_adaptive
 # from utils.utils import high_res
@@ -62,6 +64,7 @@ def vicrop_qa(model_name, method_name, image_path, question, model, processor, s
 
         inputs = processor(prompt, image, return_tensors="pt", padding=True).to(model.device, torch.bfloat16)
         ori_generate_ids = model.generate(**inputs, max_new_tokens=20, do_sample=False)
+        # --------
         ori_generation = [i.split('ASSISTANT: ')[1] for i in processor.batch_decode(ori_generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)][0]
 
         del inputs
@@ -79,6 +82,7 @@ def vicrop_qa(model_name, method_name, image_path, question, model, processor, s
         elif method_name == 'rel_att':
             att_map = rel_attention_llava(image, short_prompt, general_prompt, model, processor)
             bbox = bbox_from_att_image_adaptive(att_map, image.size, bbox_size)
+            crop_text = rel_attention_llava_text(image, short_prompt, general_prompt, model, processor)
 
         elif method_name == 'rel_att_high':
             att_maps = high_res(rel_attention_llava, image, short_prompt, general_prompt, model, processor)
@@ -97,10 +101,14 @@ def vicrop_qa(model_name, method_name, image_path, question, model, processor, s
 
         multi_prompt = f"<image><image>\nUSER: {question} Answer the question using a single word or phrase.\nASSISTANT:"
         multi_inputs = processor(multi_prompt, [image, crop_image], return_tensors="pt", padding=True).to(model.device, torch.bfloat16)
-
+        
         multi_generate_ids = model.generate(**multi_inputs, max_new_tokens=20, do_sample=False)
         multi_generation = [i.split('ASSISTANT: ')[1] for i in processor.batch_decode(multi_generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)][0]
 
+        # print(ori_generation, multi_generation)
+        # print("--------------------")
+        # ipdb.set_trace()
+        
         return ori_generation, multi_generation, bbox
     
     elif model_name == "blip":
@@ -181,7 +189,7 @@ def vicrop_qa(model_name, method_name, image_path, question, model, processor, s
 
 
 import ipdb
-from utils.dataset import ImageTextDataset
+from methods.utils.dataset import ImageTextDataset
 from torch.utils.data import Dataset, DataLoader
 
 def main(args):
@@ -210,7 +218,8 @@ def main(args):
     """
 
     if args.model == 'llava':
-        model = LlavaForConditionalGeneration.from_pretrained(args.model_id, torch_dtype=torch.bfloat16, low_cpu_mem_usage=True, attn_implementation="eager").to(args.device)
+        config = AutoConfig.from_pretrained(args.model_id)
+        model = MyLlava.from_pretrained(args.model_id, torch_dtype=torch.bfloat16, attn_implementation="eager", config=config).to(args.device)
         processor = AutoProcessor.from_pretrained(args.model_id)
     elif args.model == 'blip':
         model = InstructBlipForConditionalGeneration.from_pretrained(args.model_id, torch_dtype=torch.bfloat16, low_cpu_mem_usage=True).to(args.device)
@@ -237,31 +246,32 @@ def main(args):
         task=args.task,
         question_path=args.question_path,
         image_path=args.image_path,
-        max_samples=None
+        max_samples=args.max_sample
     )
     dataloader = DataLoader(
         dataset,
         batch_size=1,
         shuffle=False,
-        pin_memory=True
+        # num_workers=1
     )
 
     new_datas = []
 
-    for d in tqdm(dataloader, desc="Processing", ncols=100, disable=False):
+    for d in tqdm(dataloader, desc="Processing", ncols=100):
+    # for d in dataloader:
         question = d["text"][0]
         image_path = d["image_path"][0]
         short_question = d["short_question"] if 'short_question' in d else question
 
-        try:
-            if args.model == "qwen2_5":
-                ori_generation, crop_generation, bbox, num_img_tokens = vicrop_qa(args.model, args.method, image_path, question, model, processor, short_question)
-                d["num_img_tokens"] = int(num_img_tokens)
-            else:
-                ori_generation, crop_generation, bbox = vicrop_qa(args.model, args.method, image_path, question, model, processor, short_question)
-        except Exception as e:
-            print(f"[Warning] Failed on sample {d.get('qid', 'unknown')} with error: {e}")
-            continue
+        # try:
+        if args.model == "qwen2_5":
+            ori_generation, crop_generation, bbox, num_img_tokens = vicrop_qa(args.model, args.method, image_path, question, model, processor, short_question)
+            d["num_img_tokens"] = int(num_img_tokens)
+        else:
+            ori_generation, crop_generation, bbox = vicrop_qa(args.model, args.method, image_path, question, model, processor, short_question)
+        # except Exception as e:
+        #     print(f"[Warning] Failed on sample {d.get('qid', 'unknown')} with error: {e}")
+        #     continue
 
         d["original_answer"] = ori_generation
         d["crop_answer"] = crop_generation
@@ -290,6 +300,7 @@ if __name__ == "__main__":
     parser.add_argument("--method", type=str, default="new", choices=["rel_att", "pure_grad", "grad_att", "grad", "rel_att_high", "pure_grad_high", "grad_att_high", "grad_high"])
     parser.add_argument("--save_path", type=str, default="./results")
     parser.add_argument("--total_chunks", type=int, default=1)
+    parser.add_argument("--max_sample", type=int, default=500)
     parser.add_argument("--chunk_id", type=int, default=0)
     args = parser.parse_args()
 
