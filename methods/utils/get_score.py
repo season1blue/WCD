@@ -280,7 +280,7 @@ def main(args):
 
 
     report_path = os.path.join(args.save_path, 'evaluation_report.json')
-    with open(report_path, 'w') as f:
+    with open(report_path, 'a') as f:
         json.dump(results, f, indent=4)
 
     df = pd.DataFrame(results)

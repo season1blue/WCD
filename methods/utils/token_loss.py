@@ -3,6 +3,7 @@ from timm.data.transforms_factory import transforms_imagenet_train
 import torch
 from torch.functional import Tensor
 import torch.nn as nn
+import ipdb
 
 class AdaLoss(nn.Module):
     def __init__(self, base_criterion, 
@@ -21,20 +22,15 @@ class AdaLoss(nn.Module):
         self.token_minimal_weight = token_minimal_weight
 
 
-    def forward(self, outputs, y):
+    def forward(self, x, token_select):
         '''
         head_select: (b, num_layers, num_head)
         '''
 
-        x, token_select, _ = outputs["prediction"], outputs["token_select"], outputs["token_logits"]
-
-        base_loss = self.base_criterion(x, y)
         # layer_loss = self._get_layer_loss(x, layer_select, layer_logits)
         token_loss = self._get_token_loss(x, token_select)
-        
-        loss = base_loss +  self.token_loss_ratio * token_loss
 
-        return loss, dict(base_loss=base_loss, token_loss=self.token_loss_ratio * token_loss)
+        return token_loss
     
     def _get_token_loss(self, x, token_select):
         """

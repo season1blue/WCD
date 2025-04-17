@@ -16,8 +16,7 @@ class LlavaCausalLMOutputWithPast(ModelOutput):
     hidden_states: Optional[Tuple[torch.FloatTensor]] = None
     attentions: Optional[Tuple[torch.FloatTensor]] = None
     image_hidden_states: Optional[torch.FloatTensor] = None
-    
-    token_select=None
+    token_select: Optional[torch.FloatTensor] = None
 
 
 def _gumbel_sigmoid(
@@ -65,15 +64,45 @@ class TokenSelect(nn.Module):
         self.tau = tau
 
     def forward(self, x):
+        # x [2, 1024, 4096])
         b, l = x.shape[:2]
+
+        # ipdb.set_trace()
+
         logits = self.mlp_head(x[:, 1:, :])
         
         token_select = _gumbel_sigmoid(logits, self.tau, self.is_hard, threshold=self.threshold, training=self.training)
-        token_select = torch.cat([token_select.new_ones(b, 1, 1), token_select], dim=1)
+        token_select = torch.cat([token_select.new_ones(b, 1, 1), token_select], dim=1)  # cls
         
         return token_select, logits
 
 
+def extract_subsequence_mask(input_ids, start_token=32000, end_token=32001):
+    batch_size, seq_len = input_ids.shape
+    mask = torch.zeros_like(input_ids)
+
+    for i in range(batch_size):
+        seq = input_ids[i]
+        # 找最后一个 start_token
+        start_pos = (seq == start_token).nonzero(as_tuple=False).flatten()
+        if len(start_pos) == 0:
+            continue  # no start token found
+        start_idx = start_pos[-1].item()
+
+        # 找第一个 end_token 且在 start_token 之后
+        end_pos = (seq[start_idx + 1:] == end_token).nonzero(as_tuple=False)
+        if len(end_pos) == 0:
+            continue  # no end token after start token
+        end_idx = start_idx + 1 + end_pos[0].item()
+
+        # 构造 mask
+        mask[i, start_idx + 1 : end_idx] = 1  # 包含结束 token
+
+    return mask
+
+
+IMAGE_TOKEN_INDEX = 32000
+PAD_TOKEN_INDEX = 32001
 
 class MyLlava(LlavaForConditionalGeneration):
     def __init__(self, config):
@@ -103,7 +132,6 @@ class MyLlava(LlavaForConditionalGeneration):
         **lm_kwargs,
     ):
         
-        
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_hidden_states = (
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
@@ -132,6 +160,20 @@ class MyLlava(LlavaForConditionalGeneration):
             image_features = image_features.to(inputs_embeds.device, inputs_embeds.dtype)
             inputs_embeds = inputs_embeds.masked_scatter(special_image_mask, image_features)
 
+
+
+        # step 1: 获取模型学习的可学习 mask
+        policy_token = inputs_embeds
+        sub_token_select, _ = self.mlp_token_select(policy_token)
+        # step 2: 基于 input_ids，提取合法片段（1 表示是 text token 区域）
+        origin_text_mask = extract_subsequence_mask(input_ids, IMAGE_TOKEN_INDEX, PAD_TOKEN_INDEX)
+        # step 3 : 相乘得到最终 mask
+        final_mask = sub_token_select * origin_text_mask.unsqueeze(-1)
+        mlp_x = final_mask * policy_token
+        
+        
+        inputs_embeds = inputs_embeds + mlp_x
+
         outputs = self.language_model(
             inputs_embeds=inputs_embeds,
             attention_mask=attention_mask,
@@ -146,13 +188,7 @@ class MyLlava(LlavaForConditionalGeneration):
             **lm_kwargs,
         )
 
-        # TODO TOKEN SELECT
-        policy_token = inputs_embeds
-        sub_token_select, _ = self.mlp_token_select(policy_token)
-        ipdb.set_trace()
-
-
-
+        
         logits = outputs[0]
         
         loss = None
