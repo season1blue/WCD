@@ -29,14 +29,15 @@ def train(args, model, loss_fn, dataloader, processor, device, lora_output_dir):
             batch = {k: v.to(device) for k, v in batch.items()}
             outputs = model(**batch)
 
-            loss = outputs["loss"] + 5 * loss_fn(outputs["logits"], outputs["token_select"])
+            ada_loss = loss_fn(outputs["logits"], outputs["token_select"])
+            loss = outputs["loss"] + 5 * ada_loss
             # loss = outputs["loss"]
 
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
 
-            pbar.set_postfix({"loss": f"{loss.item():.4f}"})
+            pbar.set_postfix({"loss": f"{loss.item():.4f}", "adaloss": f"{ada_loss.item():.4f}"})
 
         # 每个epoch结束的时候输出
         if args.is_eval > 0:

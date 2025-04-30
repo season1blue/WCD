@@ -73,8 +73,6 @@ def _eval(args, epoch, model=None, processor=None):
     
     for d in tqdm(dataloader, desc="Processing", ncols=100):
         questions = d["text"]  # batch_size个问题
-        print(questions)
-        print("----")
         image_paths = d["image_path"]  # batch_size个图片路径
         short_questions = d["short_question"] if 'short_question' in d else questions
 
@@ -89,7 +87,8 @@ def _eval(args, epoch, model=None, processor=None):
         multi_inputs = processor(multi_prompts, images, return_tensors="pt", padding=True).to(model.device, torch.bfloat16)
         
         multi_generate_ids = model.generate(**multi_inputs, max_new_tokens=20, do_sample=False)
-        print("====")
+        ipdb.set_trace()
+        
         multi_generations = [
             i.split('ASSISTANT: ')[1]
             for i in processor.batch_decode(multi_generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)

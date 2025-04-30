@@ -141,9 +141,26 @@ class MyLlava(LlavaForConditionalGeneration):
         )
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
         
+        
         if inputs_embeds is None:
             inputs_embeds = self.get_input_embeddings()(input_ids)
 
+            # step 1: 获取模型学习的可学习 mask
+            policy_token = inputs_embeds
+            sub_token_select, _ = self.mlp_token_select(policy_token)
+            # step 2: 基于 input_ids，提取合法片段（1 表示是 text token 区域）
+            origin_text_mask = extract_subsequence_mask(input_ids, IMAGE_TOKEN_INDEX, PAD_TOKEN_INDEX)
+            final_mask = torch.where(
+                origin_text_mask.unsqueeze(-1) == 2,
+                torch.ones_like(sub_token_select),  # 位置为2，设为1
+                origin_text_mask.unsqueeze(-1) * sub_token_select    # 其它情况，做乘法
+            )
+            # ipdb.set_trace()
+            masked_inputs_ids = torch.where(final_mask.squeeze(-1) == 1, input_ids, torch.full_like(input_ids, PAD_TOKEN_INDEX))
+
+            masked_inputs_embeds = self.get_input_embeddings()(masked_inputs_ids)
+            inputs_embeds = masked_inputs_embeds
+            
         if pixel_values is not None:
             image_features = self.get_image_features(
                 pixel_values=pixel_values,
@@ -163,27 +180,7 @@ class MyLlava(LlavaForConditionalGeneration):
             image_features = image_features.to(inputs_embeds.device, inputs_embeds.dtype)
             inputs_embeds = inputs_embeds.masked_scatter(special_image_mask, image_features)
 
-
         
-        # step 1: 获取模型学习的可学习 mask
-        policy_token = inputs_embeds
-        sub_token_select, _ = self.mlp_token_select(policy_token)
-        # step 2: 基于 input_ids，提取合法片段（1 表示是 text token 区域）
-        origin_text_mask = extract_subsequence_mask(input_ids, IMAGE_TOKEN_INDEX, PAD_TOKEN_INDEX)
-        # step 3 : 相乘得到最终 mask
-        final_mask = torch.where(
-            origin_text_mask.unsqueeze(-1) == 2,
-            torch.ones_like(sub_token_select),  # 位置为2，设为1
-            origin_text_mask.unsqueeze(-1) * sub_token_select    # 其它情况，做乘法
-        )
-        # ipdb.set_trace()
-        pad_embedding = inputs_embeds[0, 20, :].view(1, 1, -1)  # [1, 1, 4096]
-
-        # 扩展成 [B, 1, D]，在 batch 中复制即可，L=688 时自动广播
-        pad_tensor = pad_embedding.expand_as(inputs_embeds)  # [4, 688, 4096]
-
-        masked_inputs_embeds = torch.where(final_mask == 1, inputs_embeds, pad_tensor)
-        # inputs_embeds = masked_input_ids
 
         outputs = self.language_model(
             inputs_embeds=masked_inputs_embeds,

@@ -3,7 +3,7 @@ export CUDA_VISIBLE_DEVICES=0
 task="mvsa_s"
 model="llava"
 method="rel_att"
-max_sample=10
+max_sample=100
 batch_size=4
 lora_name=${task}-"withadalossmlpx-0430"
 
