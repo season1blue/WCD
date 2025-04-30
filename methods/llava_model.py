@@ -97,6 +97,9 @@ def extract_subsequence_mask(input_ids, start_token=32000, end_token=32001):
 
         # 构造 mask
         mask[i, start_idx + 1 : end_idx] = 1  # 包含结束 token
+        
+        mask[i, :start_idx + 1] = 2
+        mask[i, end_idx:] = 2
 
     return mask
 
@@ -161,21 +164,29 @@ class MyLlava(LlavaForConditionalGeneration):
             inputs_embeds = inputs_embeds.masked_scatter(special_image_mask, image_features)
 
 
-
+        
         # step 1: 获取模型学习的可学习 mask
         policy_token = inputs_embeds
         sub_token_select, _ = self.mlp_token_select(policy_token)
         # step 2: 基于 input_ids，提取合法片段（1 表示是 text token 区域）
         origin_text_mask = extract_subsequence_mask(input_ids, IMAGE_TOKEN_INDEX, PAD_TOKEN_INDEX)
         # step 3 : 相乘得到最终 mask
-        final_mask = sub_token_select * origin_text_mask.unsqueeze(-1)
-        mlp_x = final_mask * policy_token
-        
-        
-        inputs_embeds = inputs_embeds + mlp_x
+        final_mask = torch.where(
+            origin_text_mask.unsqueeze(-1) == 2,
+            torch.ones_like(sub_token_select),  # 位置为2，设为1
+            origin_text_mask.unsqueeze(-1) * sub_token_select    # 其它情况，做乘法
+        )
+        # ipdb.set_trace()
+        pad_embedding = inputs_embeds[0, 20, :].view(1, 1, -1)  # [1, 1, 4096]
+
+        # 扩展成 [B, 1, D]，在 batch 中复制即可，L=688 时自动广播
+        pad_tensor = pad_embedding.expand_as(inputs_embeds)  # [4, 688, 4096]
+
+        masked_inputs_embeds = torch.where(final_mask == 1, inputs_embeds, pad_tensor)
+        # inputs_embeds = masked_input_ids
 
         outputs = self.language_model(
-            inputs_embeds=inputs_embeds,
+            inputs_embeds=masked_inputs_embeds,
             attention_mask=attention_mask,
             position_ids=position_ids,
             past_key_values=past_key_values,

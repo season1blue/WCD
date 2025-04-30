@@ -70,7 +70,7 @@ class ImageTextDataset(Dataset):
             return {
                 "image_path": item["image_path"],
                 "text": item["question"],
-                "answer": item.get("answer", ""),  # 防止部分缺失
+                "answer": item.get("answer"),  # 防止部分缺失
                 # "qid": item.get("qid", idx)
             }
         elif self.task in ["mvsa_m", "mvsa_s"]:
@@ -78,9 +78,11 @@ class ImageTextDataset(Dataset):
             
             text = f"Text: '{text}'. Confirm the sentiment from the choice (positive, negative, neutral). "
             return {
+                "id": item["id"],
                 "image_path": item["image_path"],
                 "text": text,
-                "answer": item.get("sentiment", ""),  # 防止部分缺失
+                # "answer": item["sentiment"],  # 防止部分缺失
+                "new_answer": item["new_sentiment"],  # 防止部分缺失
                 # "qid": item.get("qid", idx)
             }
             
@@ -124,16 +126,24 @@ class TrainDataset(Dataset):
             text = item["question"]
             question = item["question"]
             answer = item.get("answer", "")
+            task_description = ""
         elif self.task in ["mvsa_m", "mvsa_s"]:
             text = clean_text(item["text"].replace("\n", " ").strip())
-            question = f"Text: '{text}'. Confirm the sentiment from the choice (positive, negative, neutral)."
-            answer = item.get("sentiment", "")
+            question = text
+            answer = item.get("new_sentiment", "")
+            task_description = "Classify the Multimodal sentiment label (negative, neutral, positive). Provide a short answer with 1 label for the Multimodal label."
         else:
             text = ""
             question = item.get("question", "")
             answer = item.get("answer", "")
+            task_description = ""
 
-        full_prompt = f"USER: <image> {question} <pad>\nASSISTANT: {answer}"
+        full_prompt = f"""
+            Consider the following Image and Text: 
+            Image: <image> Text: {question} <pad>
+            {task_description}
+            ASSISTANT: {answer}
+            """
         inputs = self.processor(full_prompt, image, return_tensors="pt", padding=True, truncation=True, max_length=1024)
         # inputs = {k: v.squeeze(0) for k, v in inputs.items()}
         

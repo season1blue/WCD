@@ -1,9 +1,0 @@
-[
-    {
-        "model_name": "llava",
-        "task": "mvsa_s",
-        "method": "rel_att",
-        "raw_acc": 61.327857631759066,
-        "crop_acc": 60.30116358658453
-    }
-]

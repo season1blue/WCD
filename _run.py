@@ -222,7 +222,7 @@ def main(args):
         config = AutoConfig.from_pretrained(args.model_id)
         model = MyLlava.from_pretrained(args.model_id, torch_dtype=torch.bfloat16, attn_implementation="eager", config=config).to(args.device)
 
-        model = PeftModel.from_pretrained(model, "/ai/teacher/ssz/layer_task/mllms_know/results/ckpts/mvsa_s")
+        model = PeftModel.from_pretrained(model, args.ckpt_path)
         processor = AutoProcessor.from_pretrained(args.model_id)
     elif args.model == 'blip':
         model = InstructBlipForConditionalGeneration.from_pretrained(args.model_id, torch_dtype=torch.bfloat16, low_cpu_mem_usage=True).to(args.device)
@@ -282,17 +282,15 @@ def main(args):
 
         new_datas.append(d)
 
-    out_put_dir = os.path.dirname(args.output_path)
-    if not os.path.exists(out_put_dir):
-        os.makedirs(out_put_dir)
 
     # 将之前的result中的old_data重新拿出来
     # if os.path.exists(args.output_path):
     #     with open(args.output_path, "r") as f:
     #         old_datas = json.load(f)
     #     new_datas = old_datas + new_datas
-    
-    with open(args.output_path, "w") as f:
+
+    output_path = os.path.join(args.save_path, "jsons", args.ckpt_path.split("/")[-1] + ".json")    
+    with open(output_path, "w") as f:
         json.dump(new_datas, f, indent=4)
 
 

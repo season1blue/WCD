@@ -5,7 +5,8 @@ import difflib
 import pandas as pd
 import re
 from tqdm import tqdm
-
+# from args import load_args
+import ipdb
 contractions = {"aint": "ain't", "arent": "aren't", "cant": "can't", "couldve": "could've", "couldnt": "couldn't", \
                         "couldn'tve": "couldn't've", "couldnt've": "couldn't've", "didnt": "didn't", "doesnt": "doesn't", "dont": "don't", "hadnt": "hadn't", \
                         "hadnt've": "hadn't've", "hadn'tve": "hadn't've", "hasnt": "hasn't", "havent": "haven't", "hed": "he'd", "hed've": "he'd've", \
@@ -73,8 +74,9 @@ def get_acc(pred, gts):
 
 def get_acc_gqa(pred, gts):
     pred = process_text(pred)
-    gts = [process_text(gt) for gt in gts]
-    same_num = sum([1 if gt in pred else 0 for gt in gts])
+    gts = process_text(gts)
+    # same_num = sum([1 if gt in pred else 0 for gt in gts])
+    same_num = pred==gts
     return 100*same_num
 
 def str_simi(a, b):
@@ -184,14 +186,13 @@ def evaluate_gqa(datas):
         raw_answer = data['original_answer'][0]
         crop_answer = data['crop_answer'][0]
         answers = [data['answer']][0]
-        print(data)
+        # print(data)
 
         raw_acc = get_acc_gqa(raw_answer, answers)
         crop_acc = get_acc_gqa(crop_answer, answers)
-        print(raw_answer, crop_answer, answers)
-        print(raw_acc, crop_acc)
+        # print(raw_answer, crop_answer, answers)
+        # print(raw_acc, crop_acc)
         
-        exit()
         raw_accs.append(raw_acc)
         crop_accs.append(crop_acc)
 
@@ -201,17 +202,26 @@ def evaluate_mvsa(datas):
     raw_accs = []
     crop_accs = []
     
+    count = 0
     raw_acc, crop_acc = 0, 0
     for data in tqdm(datas):
-        raw_answer = data['original_answer']
-        crop_answer = data['crop_answer']
-        answers = data['answer']
+        image_path = data['image_path']
+        raw_answer = data['gen_answer']
+        # crop_answer = data['crop_answer']
+        answers = data['new_answer']
+        
+        # ipdb.set_trace()
 
         raw_acc = get_acc_gqa(raw_answer, answers)
-        crop_acc = get_acc_gqa(crop_answer, answers)
-
-        print(raw_answer, answers, raw_acc)
+        crop_acc = 0
+        # crop_acc = get_acc_gqa(crop_answer, answers)
         
+        # if raw_acc == 0:
+        #     count += 1
+        #     print(image_path, raw_answer, answers, raw_acc)
+        
+        # print("count", count)
+
         raw_accs.append(raw_acc)
         crop_accs.append(crop_acc)
 
@@ -233,97 +243,91 @@ def evaluate_docvqa(datas):
 
     return 100 * sum(raw_accs) / len(raw_accs), 100 * sum(crop_accs) / len(crop_accs)
 
+import ipdb
 def main(args):
     results = []
 
-    json_files = [f for f in os.listdir(args.data_dir) if f.endswith('.json')]
+    # json_files = [f for f in os.listdir(args.data_dir) if f.endswith('.json')]
 
-    json_files = [f for f in json_files if sum([task in f for task in args.tasks]) > 0]
+    # json_files = [f for f in json_files if sum([task in f for task in args.tasks]) > 0]
 
-    json_files = sorted(json_files)
+    # json_files = sorted(json_files)
+    # ckpt_path = args.ckpt_path 
+    # json_name = ckpt_path.split('/')[-1]  # mvsa_s-pure-0417
+    json_file = os.path.join(args.save_path, "jsons", args.lora_name + '.json')
+    task = args.lora_name.split('-')[0]  # mvsa_s
 
-    for json_file in json_files:
-        print(json_file)
-        filepath = os.path.join(args.data_dir, json_file)
-        print(filepath)
-        model_name, task, method = json_file.replace('.json', '').split('-')
+    with open(json_file, 'r') as f:
+        datas = json.load(f) 
 
-        with open(filepath, 'r') as f:
-            datas = json.load(f)
+    if task == 'textvqa':
+        raw_acc, crop_acc = evaluate_textvqa(datas)
+    elif task == 'vstar':
+        raw_acc, crop_acc = evaluate_vstar(datas)
+    elif task == 'pope':
+        raw_acc, crop_acc = evaluate_pope(datas)
+    elif task == 'aokvqa':
+        raw_acc, crop_acc = evaluate_aokvqa(datas)
+    elif task == 'vqav2':
+        raw_acc, crop_acc = evaluate_vqav2(datas)
+    elif task == "gqa":
+        raw_acc, crop_acc = evaluate_gqa(datas)
+    elif task in ["mvsa_m", "mvsa_s"]:
+        raw_acc, crop_acc = evaluate_mvsa(datas)
+    elif task == 'docvqa':
+        raw_acc, crop_acc = evaluate_docvqa(datas)
 
-        if task == 'textvqa':
-            raw_acc, crop_acc = evaluate_textvqa(datas)
-        elif task == 'vstar':
-            raw_acc, crop_acc = evaluate_vstar(datas)
-        elif task == 'pope':
-            raw_acc, crop_acc = evaluate_pope(datas)
-        elif task == 'aokvqa':
-            raw_acc, crop_acc = evaluate_aokvqa(datas)
-        elif task == 'vqav2':
-            raw_acc, crop_acc = evaluate_vqav2(datas)
-        elif task == "gqa":
-            raw_acc, crop_acc = evaluate_gqa(datas)
-        elif task in ["mvsa_m", "mvsa_s"]:
-            raw_acc, crop_acc = evaluate_mvsa(datas)
-        elif task == 'docvqa':
-            raw_acc, crop_acc = evaluate_docvqa(datas)
-        else:
-            continue
+    result = {
+        'version': args.lora_name,
+        'raw_acc': raw_acc,
+        'crop_acc': crop_acc
+    }
+    print(raw_acc)
 
-        results.append({
-            'model_name': model_name,
-            'task': task,
-            'method': method,
-            'raw_acc': raw_acc,
-            'crop_acc': crop_acc
-        })
-
-
-    report_path = os.path.join(args.save_path, 'evaluation_report.json')
+    report_path = os.path.join(args.save_path, "result.json")
     with open(report_path, 'a') as f:
-        json.dump(results, f, indent=4)
-
-    df = pd.DataFrame(results)
-    print(df)
+        json.dump(result, f, indent=4)
 
 
-    rows = [f"{model}_{method}" for model in args.models for method in args.methods]
-    columns = args.tasks
+    # rows = [f"{model}_{method}" for model in args.models for method in args.methods]
+    # columns = args.tasks
 
-    df1 = pd.DataFrame('', index=rows, columns=columns)
+    # df1 = pd.DataFrame('', index=rows, columns=columns)
 
-    for data in results:
-        model = data['model_name']
-        task = data['task']
-        method = data['method']
-        raw_acc = data['raw_acc']
-        crop_acc = data['crop_acc']
 
-        row_nocrop = f"{model}_nocrop"
-        if df1.loc[row_nocrop, task] == '':
-            df1.loc[row_nocrop, task] = f"{raw_acc:.2f}"
 
-        row = f"{model}_{method}"
-        if df1.loc[row, task] == '':
-            df1.loc[row, task] = f"{crop_acc:.2f}"
+    # for data in results:
+    #     model = data['model_name']
+    #     task = data['task']
+    #     method = data['method']
+    #     raw_acc = data['raw_acc']
+    #     crop_acc = data['crop_acc']
+
+    #     row_nocrop = f"{model}_nocrop"
+    #     if df1.loc[row_nocrop, task] == '':
+    #         df1.loc[row_nocrop, task] = f"{raw_acc:.2f}"
+
+    #     row = f"{model}_{method}"
+    #     if df1.loc[row, task] == '':
+    #         df1.loc[row, task] = f"{crop_acc:.2f}"
 
     # 保存到csv中
     # csv_path = os.path.join(args.save_path, 'evaluation_report.csv')
     # df1.to_csv(csv_path, sep='\t')
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, help="Path to the directory containing JSON files", default="./data/results")
-    parser.add_argument("--save_path", type=str, help="Path to save the evaluation report", default="./")
-    args = parser.parse_args()
+# if __name__ == "__main__":
+#     # parser = argparse.ArgumentParser()
+#     # parser.add_argument("--data_dir", type=str, help="Path to the directory containing JSON files", default="./data/results")
+#     # parser.add_argument("--save_path", type=str, help="Path to save the evaluation report", default="./")
+#     # parser.add_argument("--json_file", type=str)
+#     # args = parser.parse_args()
+#     args = load_args()
 
-    args.models = ['llava', 'blip', 'qwen2_5']
-
-    args.methods = ['nocrop', 'rel_att', 'grad_att', 'grad', 'rel_att_high', 'grad_att_high', 'grad_high']
-
-    # args.tasks = ['textvqa', 'vstar', 'pope', 'aokvqa', 'docvqa', 'chartqa', 'infoqa', 'mvsa_m', 'mvsa_s', 'gqa']
-    args.tasks = ['mvsa_s']
+#     args.models = ['llava', 'blip', 'qwen2_5']
+#     args.methods = ['nocrop', 'rel_att', 'grad_att', 'grad', 'rel_att_high', 'grad_att_high', 'grad_high']
+#     # args.tasks = ['textvqa', 'vstar', 'pope', 'aokvqa', 'docvqa', 'chartqa', 'infoqa', 'mvsa_m', 'mvsa_s', 'gqa']
+#     args.tasks = ['mvsa_s']
     
 
-    main(args)
+#     main(args)
