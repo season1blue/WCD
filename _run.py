@@ -3,7 +3,7 @@ from PIL import Image
 import torch
 import numpy as np
 from transformers import AutoProcessor, InstructBlipProcessor, InstructBlipForConditionalGeneration, Qwen2_5_VLForConditionalGeneration, AutoConfig
-from methods.llava_model import MyLlava
+from layer_task.mllms_know.methods.my_llava import MyLlava
 import argparse
 from tqdm import tqdm
 import json

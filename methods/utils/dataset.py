@@ -47,9 +47,11 @@ class ImageTextDataset(Dataset):
         for d in self.data:
             if "image_path" in d:
                 d["image_path"] = os.path.join(image_path, d["image_path"])
-            else:
+            elif "imageId" in d:
+                d["image_path"] = os.path.join(image_path, f"{d['imageId']}.jpg")
+            elif "image_id" in d:
                 d["image_path"] = os.path.join(image_path, f"{d['image_id']}.jpg")
-
+            
     def load_data(self, path):
         if os.path.exists(path):
             with open(path, "r") as f:
@@ -66,11 +68,18 @@ class ImageTextDataset(Dataset):
 
         # if self.transform:
         #     image = self.transform(image)
-        if self.task in ["gqa", "textvqa"]:
+        if self.task == "gqa":
             return {
                 "image_path": item["image_path"],
                 "text": item["question"],
-                "answer": item.get("answer"),  # 防止部分缺失
+                "answer": item["answer"],  # 防止部分缺失
+                # "qid": item.get("qid", idx)
+            }
+        elif self.task == "textvqa":
+            return {
+                "image_path": item["image_path"],
+                "text": item["question"],
+                "answers": tuple(item["answers"]),  # 防止部分缺失
                 # "qid": item.get("qid", idx)
             }
         elif self.task in ["mvsa_m", "mvsa_s"]:
@@ -94,18 +103,18 @@ class TrainDataset(Dataset):
         self.processor = processor
         self.image_path = image_path
 
-        if task == "textvqa":
-            self.data = self.load_data(question_path)['data']
-        else:
-            self.data = self.load_data(question_path)
+        self.data = self.load_data(question_path)
 
         if max_samples != -1:
             self.data = self.data[:max_samples]
 
+        # 补全每条数据的 image 路径
         for d in self.data:
             if "image_path" in d:
                 d["image_path"] = os.path.join(image_path, d["image_path"])
-            else:
+            elif "imageId" in d:
+                d["image_path"] = os.path.join(image_path, f"{d['imageId']}.jpg")
+            elif "image_id" in d:
                 d["image_path"] = os.path.join(image_path, f"{d['image_id']}.jpg")
 
     def load_data(self, path):
@@ -122,16 +131,24 @@ class TrainDataset(Dataset):
         item = self.data[idx]
         image = Image.open(item["image_path"]).convert("RGB")
 
-        if self.task in ["gqa", "textvqa"]:
+        if self.task == "gqa":
             text = item["question"]
             question = item["question"]
             answer = item.get("answer", "")
             task_description = ""
+            
+        elif self.task == "textvqa":
+            text = item["question"]    
+            question = item["question"]
+            answer = item["one_answer"]
+            task_description = ""
+            
         elif self.task in ["mvsa_m", "mvsa_s"]:
             text = clean_text(item["text"].replace("\n", " ").strip())
             question = text
             answer = item.get("new_sentiment", "")
             task_description = "Classify the Multimodal sentiment label (negative, neutral, positive). Provide a short answer with 1 label for the Multimodal label."
+        
         else:
             text = ""
             question = item.get("question", "")

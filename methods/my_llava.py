@@ -7,6 +7,9 @@ from typing import List, Optional, Tuple, Union
 from torch import nn
 
 import ipdb
+from methods.my_llama import MyLlamaForCausalLM
+from transformers import AutoModelForCausalLM
+
 
 @dataclass
 class LlavaCausalLMOutputWithPast(ModelOutput):
@@ -69,10 +72,10 @@ class TokenSelect(nn.Module):
 
         # ipdb.set_trace()
 
-        logits = self.mlp_head(x[:, 1:, :])
+        logits = self.mlp_head(x[:, 1:-1, :])
         
         token_select = _gumbel_sigmoid(logits, self.tau, self.is_hard, threshold=self.threshold, training=self.training)
-        token_select = torch.cat([token_select.new_ones(b, 1, 1), token_select], dim=1)  # cls
+        token_select = torch.cat([token_select.new_ones(b, 1, 1), token_select, token_select.new_ones(b, 1, 1)], dim=1)  # cls
         
         return token_select, logits
 
@@ -107,12 +110,99 @@ def extract_subsequence_mask(input_ids, start_token=32000, end_token=32001):
 IMAGE_TOKEN_INDEX = 32000
 PAD_TOKEN_INDEX = 32001
 
+
+
+
+
+
+from transformers import LlamaForCausalLM, AutoTokenizer, AddedToken
+
 class MyLlava(LlavaForConditionalGeneration):
     def __init__(self, config):
         super().__init__(config)
 
         hidden_size = config.text_config.hidden_size
         self.mlp_token_select = TokenSelect(dim_in=hidden_size, num_sub_layer=1)
+        
+        self.language_model = AutoModelForCausalLM.from_config(config.text_config)
+        # ipdb.set_trace()
+        # self.language_model = LlamaForCausalLM.from_pretrained("lmsys/vicuna-7b-v1.5", config=config.text_config) # 
+
+
+
+        # tokenizer = AutoTokenizer.from_pretrained("lmsys/vicuna-7b-v1.5")
+        # add_num = 1 
+        # ## 添加 <image>
+        # tokenizer.add_tokens(AddedToken("<image>", special=True, normalized=False), special_tokens=True)
+        
+        # # 首先计算原始词表的均值和方差
+        # pre_expansion_embeddings = self.language_model.language_model.model.embed_tokens.weight.data
+        # mu = torch.mean(pre_expansion_embeddings, dim=0).float()
+        # n = pre_expansion_embeddings.size()[0]
+        # sigma = ((pre_expansion_embeddings - mu).T @ (pre_expansion_embeddings - mu)) / n
+        # dist = torch.distributions.multivariate_normal.MultivariateNormal(mu, covariance_matrix=1e-5 * sigma)
+
+        # # 扩充词表
+        # pad_shape = 64
+        # vocab_size = config.text_config.vocab_size
+        # # 第二个参数pad_shape 参数名叫做 pad to multiple of , 意思是直接弄到 64 的某一个倍数
+        # self.language_model.resize_token_embeddings(config.text_config.vocab_size + add_num , pad_shape)
+        # self.language_model.language_model.model.embed_tokens.weight.data[vocab_size:] = torch.stack(
+        #     tuple((dist.sample() for _ in range(self.language_model.language_model.model.embed_tokens.weight.data[vocab_size:].shape[0]))),
+        #     dim=0,
+        # )
+        # self.language_model.language_model.lm_head.weight.data[vocab_size:] = torch.stack(
+        #     tuple((dist.sample() for _ in range(self.language_model.language_model.lm_head.weight.data[vocab_size:].shape[0]))),
+        #     dim=0,
+        # )
+
+
+    
+    # def get_image_features(
+    #     self,
+    #     pixel_values: torch.FloatTensor,
+    #     vision_feature_layer: Union[int, List[int]],
+    #     vision_feature_select_strategy: str,
+    #     **kwargs,
+    # ):
+    #     """
+    #     Obtains image last hidden states from the vision tower and apply multimodal projection.
+
+    #     Args:
+    #         pixel_values (`torch.FloatTensor]` of shape `(batch_size, channels, height, width)`)
+    #            The tensors corresponding to the input images.
+    #         vision_feature_layer (`Union[int, List[int]]`):
+    #             The index of the layer to select the vision feature. If multiple indices are provided,
+    #             the vision feature of the corresponding indices will be concatenated to form the
+    #             vision features.
+    #         vision_feature_select_strategy (`str`):
+    #             The feature selection strategy used to select the vision feature from the vision backbone.
+    #             Can be one of `"default"` or `"full"`
+    #     Returns:
+    #         image_features (`torch.Tensor`): Image feature tensor of shape `(num_images, image_length, embed_dim)`).
+    #     """
+    #     if vision_feature_select_strategy not in ["default", "full"]:
+    #         raise ValueError(f"Unexpected select feature strategy: {self.config.vision_feature_select_strategy}")
+
+    #     kwargs = {k: v for k, v in kwargs.items() if v is not None}
+    #     # this is not memory efficient at all (output_hidden_states=True) will save all the hidden states.
+    #     image_outputs = self.vision_tower(pixel_values, output_hidden_states=True, **kwargs)
+
+    #     # If we have one vision feature layer, return the corresponding hidden states,
+    #     # otherwise, select the hidden states of each feature layer and concatenate them
+    #     if isinstance(vision_feature_layer, int):
+    #         selected_image_feature = image_outputs.hidden_states[vision_feature_layer]
+    #         if vision_feature_select_strategy == "default":
+    #             selected_image_feature = selected_image_feature[:, 1:]
+    #     else:
+    #         hs_pool = [image_outputs.hidden_states[layer_idx] for layer_idx in vision_feature_layer]
+    #         # For default; crop CLS from each hidden state in the hidden state pool
+    #         if vision_feature_select_strategy == "default":
+    #             hs_pool = [hs[:, 1:] for hs in hs_pool]
+    #         selected_image_feature = torch.cat(hs_pool, dim=-1)
+
+    #     image_features = self.multi_modal_projector(selected_image_feature)
+    #     return image_features
     
     def forward(
         self,
@@ -148,18 +238,20 @@ class MyLlava(LlavaForConditionalGeneration):
             # step 1: 获取模型学习的可学习 mask
             policy_token = inputs_embeds
             sub_token_select, _ = self.mlp_token_select(policy_token)
+            
             # step 2: 基于 input_ids，提取合法片段（1 表示是 text token 区域）
             origin_text_mask = extract_subsequence_mask(input_ids, IMAGE_TOKEN_INDEX, PAD_TOKEN_INDEX)
             final_mask = torch.where(
                 origin_text_mask.unsqueeze(-1) == 2,
                 torch.ones_like(sub_token_select),  # 位置为2，设为1
                 origin_text_mask.unsqueeze(-1) * sub_token_select    # 其它情况，做乘法
-            )
+            ).squeeze(-1)
             # ipdb.set_trace()
-            masked_inputs_ids = torch.where(final_mask.squeeze(-1) == 1, input_ids, torch.full_like(input_ids, PAD_TOKEN_INDEX))
+            masked_inputs_ids = torch.where(final_mask.squeeze(-1) == 1, input_ids, torch.full_like(input_ids, 396))
 
             masked_inputs_embeds = self.get_input_embeddings()(masked_inputs_ids)
-            inputs_embeds = masked_inputs_embeds
+            # inputs_embeds = inputs_embeds + masked_inputs_embeds
+            inputs_embeds = inputs_embeds
             
         if pixel_values is not None:
             image_features = self.get_image_features(
@@ -180,10 +272,9 @@ class MyLlava(LlavaForConditionalGeneration):
             image_features = image_features.to(inputs_embeds.device, inputs_embeds.dtype)
             inputs_embeds = inputs_embeds.masked_scatter(special_image_mask, image_features)
 
-        
 
         outputs = self.language_model(
-            inputs_embeds=masked_inputs_embeds,
+            inputs_embeds=inputs_embeds,
             attention_mask=attention_mask,
             position_ids=position_ids,
             past_key_values=past_key_values,

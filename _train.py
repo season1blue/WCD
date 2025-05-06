@@ -10,7 +10,7 @@ from peft import get_peft_model, LoraConfig, TaskType  # 加入 PEFT
 
 from methods.utils.dataset import TrainDataset
 from methods.utils.token_loss import AdaLoss # type: ignore
-from methods.llava_model import MyLlava
+from methods.my_llava import MyLlava
 
 from methods.utils.args import load_args # type: ignore
 
@@ -30,7 +30,7 @@ def train(args, model, loss_fn, dataloader, processor, device, lora_output_dir):
             outputs = model(**batch)
 
             ada_loss = loss_fn(outputs["logits"], outputs["token_select"])
-            loss = outputs["loss"] + 5 * ada_loss
+            loss = outputs["loss"] + 50 * ada_loss
             # loss = outputs["loss"]
 
             loss.backward()

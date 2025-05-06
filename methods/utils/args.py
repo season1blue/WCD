@@ -17,10 +17,11 @@ task_to_image_path = {
 
 task_to_question_path = {
     "aokvqa": "./data/aokvqa/data.json",
-    "gqa": "/ai/teacher/ssz/all_data/mqa/GQA/jsons/balanced_evalset_list.json",
+    "gqa": "/ai/teacher/ssz/all_data/mqa/GQA/jsons/balanced_evalset.json",
+    # "gqa": "/ai/teacher/ssz/all_data/mqa/GQA/jsons/eval_random_5000.json",
     "mvsa_m": "/ai/teacher/ssz/all_data/msa/MVSA_Multiple/test.json",
     "mvsa_s": "/ai/teacher/ssz/all_data/msa/MVSA_Single/new_test_mix.json",
-    "textvqa": "/ai/teacher/dkc/Assets/TextVQA/TextVQA_0.5.1_val.json",
+    "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/processed/val_mix.json",
     "docvqa": "./data/docvqa/data.json",
     "pope": "./data/pope/data.json",
     "vstar": "./data/vstar/data.json",
@@ -29,7 +30,9 @@ task_to_question_path = {
 
 
 task_to_train_path = {
-    "mvsa_s": "/ai/teacher/ssz/all_data/msa/MVSA_Single/new_train_mix.json"
+    "mvsa_s": "/ai/teacher/ssz/all_data/msa/MVSA_Single/new_train_mix.json",
+    "gqa": "/ai/teacher/ssz/all_data/mqa/GQA/jsons/balanced_trainset.json",
+    "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/processed/train_mix.json",
 }
 
 model_to_fullname = {

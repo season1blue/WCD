@@ -67,16 +67,29 @@ def process_text(text):
     return text
 
 def get_acc(pred, gts):
-    pred = process_text(pred)
-    gts = [process_text(gt) for gt in gts]
-    same_num = sum([1 if pred == gt else 0 for gt in gts])
-    return 100*min(0.3*same_num, 1)
+    pred = process_text(pred).split(" ")
+    gts = [process_text(gt).split(" ") for gt in gts]
 
-def get_acc_gqa(pred, gts):
+    flatten_gt = set(word for sublist in gts for word in sublist)
+    same_num = 1 if any(p in flatten_gt for p in pred) else 0
+    return 100*same_num
+
+def get_acc_mvsa(pred, gts):
     pred = process_text(pred)
     gts = process_text(gts)
     # same_num = sum([1 if gt in pred else 0 for gt in gts])
     same_num = pred==gts
+    return 100*same_num
+
+
+def get_acc_gqa(pred, gts):
+    pred = process_text(pred).split(" ")
+    gts = process_text(gts).split(" ")
+    same_num = 0
+    for gt in gts:
+        if gt in pred:
+            same_num = 1
+    # same_num = pred==gts
     return 100*same_num
 
 def str_simi(a, b):
@@ -94,12 +107,12 @@ def evaluate_textvqa(datas):
     raw_accs = []
     crop_accs = []
     for data in tqdm(datas):
-        raw_answer = data['original_answer']
-        crop_answer = data['crop_answer']
-        answers = data['answer']
+        raw_answer = data['gen_answer']
+        # crop_answer = data['crop_answer']
+        answers = data['answers']
 
         raw_acc = get_acc(raw_answer, answers)
-        crop_acc = get_acc(crop_answer, answers)
+        crop_acc = 0
 
         raw_accs.append(raw_acc)
         crop_accs.append(crop_acc)
@@ -183,15 +196,17 @@ def evaluate_gqa(datas):
     
     raw_acc, crop_acc = 0, 0
     for data in tqdm(datas):
-        raw_answer = data['original_answer'][0]
-        crop_answer = data['crop_answer'][0]
-        answers = [data['answer']][0]
+        raw_answer = data['gen_answer']
+        answers = data['answer']
         # print(data)
 
         raw_acc = get_acc_gqa(raw_answer, answers)
-        crop_acc = get_acc_gqa(crop_answer, answers)
+        crop_acc = 0
+        # crop_acc = get_acc_gqa(crop_answer, answers)
         # print(raw_answer, crop_answer, answers)
         # print(raw_acc, crop_acc)
+        if raw_acc == 0:
+            print(data)
         
         raw_accs.append(raw_acc)
         crop_accs.append(crop_acc)
@@ -212,13 +227,10 @@ def evaluate_mvsa(datas):
         
         # ipdb.set_trace()
 
-        raw_acc = get_acc_gqa(raw_answer, answers)
+        raw_acc = get_acc_mvsa(raw_answer, answers)
         crop_acc = 0
         # crop_acc = get_acc_gqa(crop_answer, answers)
         
-        # if raw_acc == 0:
-        #     count += 1
-        #     print(image_path, raw_answer, answers, raw_acc)
         
         # print("count", count)
 
