@@ -10,7 +10,7 @@ from peft import get_peft_model, LoraConfig, TaskType  # 加入 PEFT
 
 from methods.utils.dataset import TrainDataset
 from methods.utils.token_loss import AdaLoss # type: ignore
-from methods.my_llava import MyLlava
+# from methods.my_llava import MyLlava
 from llava.model import LlavaLlamaForCausalLM
 
 from methods.utils.args import load_args # type: ignore
@@ -48,10 +48,24 @@ def train(args, model, loss_fn, dataloader, processor, device, lora_output_dir):
     model.save_pretrained(os.path.join(lora_output_dir, args.lora_name), safe_serialization=False )
     print(f"LoRA adapter saved to {os.path.join(lora_output_dir, args.lora_name)}")
 
+# def find_all_linear_names(model):
+#     cls = torch.nn.Linear
+#     lora_module_names = set()
+#     multimodal_keywords = ['multi_modal_projector', 'vision_model']
+#     for name, module in model.named_modules():
+#         if any(mm_keyword in name for mm_keyword in multimodal_keywords):
+#             continue
+#         if isinstance(module, cls):
+#             names = name.split('.')
+#             lora_module_names.add(names[0] if len(names) == 1 else names[-1])
+
+#     if 'lm_head' in lora_module_names: # needed for 16-bit
+#         lora_module_names.remove('lm_head')
+#     return list(lora_module_names)
 def find_all_linear_names(model):
     cls = torch.nn.Linear
     lora_module_names = set()
-    multimodal_keywords = ['multi_modal_projector', 'vision_model']
+    multimodal_keywords = ['mm_projector', 'vision_tower', 'vision_resampler']
     for name, module in model.named_modules():
         if any(mm_keyword in name for mm_keyword in multimodal_keywords):
             continue
@@ -98,10 +112,13 @@ def main(args):
         lora_dropout=0.1,
         target_modules=find_all_linear_names(model),
         # target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
-        init_lora_weights="gaussian",
+        task_type="CAUSAL_LM",
     )
+    # ipdb.set_trace()
+    model.to(torch.bfloat16)
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
+    
 
 
     # 构建损失函数

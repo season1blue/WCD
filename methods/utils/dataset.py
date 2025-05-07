@@ -8,6 +8,8 @@ import re
 import ipdb
 import torch
 
+from llava.train.train import LazySupervisedDataset
+
 
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
@@ -92,6 +94,9 @@ class ImageTextDataset(Dataset):
                 # "qid": item.get("qid", idx)
             }
             
+         
+    
+        
             
             
 class TrainDataset(Dataset):

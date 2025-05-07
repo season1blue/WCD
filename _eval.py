@@ -82,32 +82,39 @@ def _eval(args, epoch=None, model=None, processor=None):
 
     
     for dd in tqdm(dataloader, desc="Processing", ncols=100):
-        qs = dd["text"][0]  # batch_size个问题
-        image_path = dd["image_path"][0]  # batch_size个图片路径
-
-        # prompts.append(f"<image>\nUSER: {qs} Answer the question using a single word or phrase.\nASSISTANT:")
-        if model.config.mm_use_im_start_end:
-            qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + 'Answer the question using a single word or phrase \n' + qs
-        else:
-            qs = DEFAULT_IMAGE_TOKEN + '\n' + 'Answer the question using a single word or phrase \n' + qs
-
-        conv = conv_templates["llava_v1"].copy()
-        conv.append_message(conv.roles[0], qs)
-        conv.append_message(conv.roles[1], None)
-        prompt = conv.get_prompt()
+        questions = dd["text"]  # batch_size个问题
+        image_paths = dd["image_path"]  # batch_size个图片路径
 
 
-        input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
+        prompts = []
+        input_ids = []
+        for qs in questions:
+            # prompts.append(f"<image>\nUSER: {qs} Answer the question using a single word or phrase.\nASSISTANT:")
+            if model.config.mm_use_im_start_end:
+                qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + 'Answer the question using a single word or phrase \n' + qs
+            else:
+                qs =  DEFAULT_IMAGE_TOKEN + '\n' + 'Answer the question using a single word or phrase \n' + qs
 
-        image = Image.open(image_path).convert("RGB")
-        image_tensor = process_images([image], image_processor, model.config)[0]
+            conv = conv_templates["llava_v1"].copy()
+            conv.append_message(conv.roles[0], qs)
+            conv.append_message(conv.roles[1], None)
+            prompt = conv.get_prompt()
+
+            input_id = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').cuda()
+            # input_ids.append(input_id)
+            input_ids = input_id.unsqueeze(0)
+
+        # input_ids = torch.nn.utils.rnn.pad_sequence(input_ids, batch_first=True, padding_value=tokenizer.pad_token_id)
+
+        image = [Image.open(image_path).convert("RGB") for image_path in image_paths]
+        image_tensor = process_images(image, image_processor, model.config)
         
         
         with torch.inference_mode():
             output_ids = model.generate(
                 input_ids,
-                images=image_tensor.unsqueeze(0).half().cuda(),
-                image_sizes=[image.size],
+                images=image_tensor.half().cuda(),
+                image_sizes=[image[0].size],
                 do_sample=True,
                 temperature=0.2,
                 top_p=None,
@@ -117,21 +124,10 @@ def _eval(args, epoch=None, model=None, processor=None):
                 max_new_tokens=1024,
                 use_cache=True)
 
-        outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
-        
-        print(outputs)
-        
-        # multi_generations = [
-        #     i.split('ASSISTANT: ')[1]
-        #     for i in processor.batch_decode(multi_generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)
-        # ]
-
-
-
-
-
-
-
+        multi_generations = [
+            i.strip()
+            for i in tokenizer.batch_decode(output_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)
+        ]
 
         if args.task in ["mvsa_m", "mvsa_s"]:
             # 把batch里的每个样本分别补充
@@ -145,7 +141,6 @@ def _eval(args, epoch=None, model=None, processor=None):
                 new_d = {k: v[i] for k, v in dd.items()}  # 把第i个样本单独取出
                 new_d["gen_answer"] = multi_generations[i]
                 new_datas.append(new_d)
-
 
     output_path = os.path.join(args.save_path, "jsons", args.lora_name+ ".json")    
     print("evaluation output to", output_path)
