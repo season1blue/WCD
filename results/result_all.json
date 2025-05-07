@@ -296,3 +296,21 @@
     "time": "2025-05-06d 20:16:56",
     "acc": 61.44
 }
+{
+    "version": "textvqa-base-0506",
+    "epoch": 0,
+    "time": "2025-05-06d 23:38:35",
+    "acc": 62.06
+}
+{
+    "version": "textvqa-base-0506",
+    "epoch": 1,
+    "time": "2025-05-07d 02:10:26",
+    "acc": 64.18
+}
+{
+    "version": "textvqa-base-0506",
+    "epoch": 2,
+    "time": "2025-05-07d 11:52:03",
+    "acc": 65.02
+}

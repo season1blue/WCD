@@ -33,10 +33,7 @@ def clean_text(text: str) -> str:
 class ImageTextDataset(Dataset):
     def __init__(self, task, question_path, image_path, max_samples=500):
         self.task = task
-        if task == "textvqa":
-            self.data = self.load_data(question_path)['data']
-        else:
-            self.data = self.load_data(question_path)
+        self.data = self.load_data(question_path)
             
         if max_samples != -1:
             self.data = self.data[:max_samples]  # 截断前N条

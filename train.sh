@@ -1,7 +1,7 @@
 #!/bin/bash
-export CUDA_VISIBLE_DEVICES=3
+export CUDA_VISIBLE_DEVICES=1
 task="textvqa"
-model="llava"
+model="llava_new"
 method="rel_att"
 max_sample=500
 batch_size=4

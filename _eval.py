@@ -4,7 +4,6 @@ from PIL import Image
 import torch
 import numpy as np
 from transformers import AutoProcessor, AutoConfig
-from methods.my_llava import MyLlava
 import argparse
 from tqdm import tqdm
 import json
@@ -34,38 +33,26 @@ def custom_collate_fn(batch):
 
 
 
+from llava.model.builder import load_pretrained_model
+from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
+from llava.conversation import conv_templates, SeparatorStyle
+from llava.model.builder import load_pretrained_model
+from llava.utils import disable_torch_init
+from llava.mm_utils import tokenizer_image_token, process_images, get_model_name_from_path
+
+
 def _eval(args, epoch=None, model=None, processor=None):
-    """
-    Main function to run the visual cropping and question answering pipeline.
-    
-    This function loads the specified model and processor, processes the dataset,
-    applies the visual cropping and question answering to each data point,
-    and saves the results to a JSON file.
-    
-    Args:
-        args: An argparse.Namespace object containing the following attributes:
-            - model: String indicating which model to use ("llava" or "blip")
-            - model_id: The model identifier for loading from HuggingFace
-            - device: The device to run the model on ("cuda" or "cpu")
-            - question_path: Path to the question dataset
-            - image_path: Path to the directory containing images
-            - task: The task identifier
-            - method: The attention method to use
-            - output_path: Path to save the results
-            - total_chunks: Total number of chunks to split the dataset into
-            - chunk_id: The ID of the current chunk to process
-            
-    Returns:
-        None: Results are saved to the specified output file
-    """
 
     if model is None:
-        config = AutoConfig.from_pretrained(args.model_id)
-        model = MyLlava.from_pretrained(args.model_id, torch_dtype=torch.bfloat16, attn_implementation="eager", config=config).to(args.device)
+
+        model_path = args.model_id
+        model_name = get_model_name_from_path(model_path)
+        tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, model_base=None, model_name=model_name)
+
+
         if args.lora_name != "NONE":
             ckpt_path = os.path.join("/ai/teacher/ssz/layer_task/mllms_know/results/ckpts", args.lora_name)
             model = PeftModel.from_pretrained(model, ckpt_path, adapter_file="adapter_model.safetensors")
-        processor = AutoProcessor.from_pretrained(args.model_id) 
         
 
     dataset = ImageTextDataset(
@@ -95,26 +82,56 @@ def _eval(args, epoch=None, model=None, processor=None):
 
     
     for dd in tqdm(dataloader, desc="Processing", ncols=100):
-        questions = dd["text"]  # batch_size个问题
-        image_paths = dd["image_path"]  # batch_size个图片路径
-        short_questions = dd["short_question"] if 'short_question' in dd else questions
+        qs = dd["text"][0]  # batch_size个问题
+        image_path = dd["image_path"][0]  # batch_size个图片路径
 
-        images = [Image.open(image_path).convert("RGB") for image_path in image_paths]
-        model.eval()
+        # prompts.append(f"<image>\nUSER: {qs} Answer the question using a single word or phrase.\nASSISTANT:")
+        if model.config.mm_use_im_start_end:
+            qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + 'Answer the question using a single word or phrase \n' + qs
+        else:
+            qs = DEFAULT_IMAGE_TOKEN + '\n' + 'Answer the question using a single word or phrase \n' + qs
 
-        multi_prompts = [
-            f"<image>\nUSER: {q} Answer the question using a single word or phrase.\nASSISTANT:"
-            for q in questions
-        ]
+        conv = conv_templates["llava_v1"].copy()
+        conv.append_message(conv.roles[0], qs)
+        conv.append_message(conv.roles[1], None)
+        prompt = conv.get_prompt()
 
-        multi_inputs = processor(multi_prompts, images, return_tensors="pt", padding=True).to(model.device, torch.bfloat16)
+
+        input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
+
+        image = Image.open(image_path).convert("RGB")
+        image_tensor = process_images([image], image_processor, model.config)[0]
         
-        multi_generate_ids = model.generate(**multi_inputs, max_new_tokens=20, do_sample=False)
         
-        multi_generations = [
-            i.split('ASSISTANT: ')[1]
-            for i in processor.batch_decode(multi_generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)
-        ]
+        with torch.inference_mode():
+            output_ids = model.generate(
+                input_ids,
+                images=image_tensor.unsqueeze(0).half().cuda(),
+                image_sizes=[image.size],
+                do_sample=True,
+                temperature=0.2,
+                top_p=None,
+                num_beams=1,
+                # no_repeat_ngram_size=3,
+                cache_position=None,
+                max_new_tokens=1024,
+                use_cache=True)
+
+        outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+        
+        print(outputs)
+        
+        # multi_generations = [
+        #     i.split('ASSISTANT: ')[1]
+        #     for i in processor.batch_decode(multi_generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)
+        # ]
+
+
+
+
+
+
+
 
         if args.task in ["mvsa_m", "mvsa_s"]:
             # 把batch里的每个样本分别补充

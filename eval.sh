@@ -2,10 +2,10 @@
 export CUDA_VISIBLE_DEVICES=0
 
 task="textvqa"
-model="llava"
+model="llava_new"
 method="rel_att"
 max_sample=5000
-batch_size=64
+batch_size=1
 # ckpt_path="/ai/teacher/ssz/layer_task/mllms_know/results/ckpts/mvsa_s-woadaloss-0424"
 # lora_name="mvsa_s-woadaloss-0424"
 lora_name="NONE"

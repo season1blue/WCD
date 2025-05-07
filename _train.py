@@ -11,6 +11,7 @@ from peft import get_peft_model, LoraConfig, TaskType  # 加入 PEFT
 from methods.utils.dataset import TrainDataset
 from methods.utils.token_loss import AdaLoss # type: ignore
 from methods.my_llava import MyLlava
+from llava.model import LlavaLlamaForCausalLM
 
 from methods.utils.args import load_args # type: ignore
 
@@ -63,23 +64,31 @@ def find_all_linear_names(model):
     return list(lora_module_names)
 
 
+
+
+from llava.model.builder import load_pretrained_model
+from llava.mm_utils import tokenizer_image_token, process_images, get_model_name_from_path
+
 # ========== 主入口 ==========
 def main(args):
     
+    model_path = args.model_id
+    model_name = get_model_name_from_path(model_path)
+    tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, model_base=None, model_name=model_name)
     
-    # 加载配置
-    config = AutoConfig.from_pretrained(args.model_id)
-    config.dropout=0.1
-    # config.token_select_tau = 5
-    # config.token_select_layers = 1
+    # # 加载配置
+    # config = AutoConfig.from_pretrained(args.model_id)
+    # config.dropout=0.1
+    # # config.token_select_tau = 5
+    # # config.token_select_layers = 1
 
-    processor = AutoProcessor.from_pretrained(args.model_id)
-    model = MyLlava.from_pretrained(
-        args.model_id,
-        config=config,
-        torch_dtype=torch.bfloat16,
-        attn_implementation="eager"
-    ).to(args.device)
+    # processor = AutoProcessor.from_pretrained(args.model_id)
+    # model = LlavaLlamaForCausalLM.from_pretrained(
+    #     args.model_id,
+    #     torch_dtype=torch.bfloat16,
+    #     # config=config,
+    #     # attn_implementation="eager"
+    # ).to(args.device)
 
 
     # ==== 注入 LoRA ====
@@ -96,7 +105,7 @@ def main(args):
 
 
     # 构建损失函数
-    Ada_loss_fn = AdaLoss(base_criterion=torch.nn.CrossEntropyLoss(ignore_index=processor.tokenizer.pad_token_id))
+    Ada_loss_fn = AdaLoss(base_criterion=torch.nn.CrossEntropyLoss())
 
     train_dataset = TrainDataset(args.task, args.train_path, args.image_path, processor=processor, max_samples=args.max_sample)
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=TrainDataset.collate_fn)
