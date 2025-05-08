@@ -29,7 +29,7 @@ def train(args, model, loss_fn, dataloader, device, lora_output_dir):
         for step, batch in pbar:
 
             batch = {k: v.to(device) for k, v in batch.items()}
-            outputs = model(**batch)
+            outputs = model(**batch, output_attentions=True)
 
             # ada_loss = loss_fn(outputs["logits"], outputs["token_select"])
             # loss = outputs["loss"] + 50 * ada_loss
@@ -91,7 +91,6 @@ def main(args):
     model_path = args.model_id
     model_name = get_model_name_from_path(model_path)
     tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, model_base=None, model_name=model_name)
-    
     # # 加载配置
     # config = AutoConfig.from_pretrained(args.model_id)
     # config.dropout=0.1
@@ -119,12 +118,6 @@ def main(args):
     # ipdb.set_trace()
     # 是否可用
     print("CUDA available:", torch.cuda.is_available())
-
-    # 当前使用的 GPU 设备
-    if torch.cuda.is_available():
-        print("Current device:", torch.cuda.current_device())
-        print("Device name:", torch.cuda.get_device_name(torch.cuda.current_device()))
-        print("GPU count:", torch.cuda.device_count())
     
     model.to(torch.bfloat16)
     vision_tower = model.get_vision_tower()

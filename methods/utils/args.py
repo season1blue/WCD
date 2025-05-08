@@ -32,7 +32,8 @@ task_to_question_path = {
 task_to_train_path = {
     "mvsa_s": "/ai/teacher/ssz/all_data/msa/MVSA_Single/new_train_mix.json",
     "gqa": "/ai/teacher/ssz/all_data/mqa/GQA/jsons/balanced_trainset.json",
-    "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/processed/train_mix.json",
+    # "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/processed/train_mix.json",
+    "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/processed/train_example.json",
 }
 
 model_to_fullname = {

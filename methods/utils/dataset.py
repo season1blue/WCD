@@ -344,7 +344,9 @@ class TrainDataset(Dataset):
 
     def __getitem__(self, idx):
         item = self.data[idx]
-        
+
+        print(item['question'], item["image_path"])
+
         image = Image.open(item["image_path"]).convert("RGB")
         image = self.image_processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
         image = image.to(torch.bfloat16)

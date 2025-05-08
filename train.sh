@@ -9,7 +9,7 @@ batch_size=6
 lora_name=${task}-"trainhtl-0508"
 
 # 构造日志文件名
-log_file="${task}-${CUDA_VISIBLE_DEVICES}.log"
+log_file="results/${task}-${CUDA_VISIBLE_DEVICES}.log"
 
 # 追加写入 LoRA 名称及时间戳
 echo -e "\n===== New Run =====\nLoRA name: $lora_name\nStart time: $(date)\n" >> $log_file

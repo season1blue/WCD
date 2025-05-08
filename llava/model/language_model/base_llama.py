@@ -1,4 +1,4 @@
-from transformers import LlamaModel, LlamaForCausalLM
+# from transformers import LlamaModel, LlamaForCausalLM
 
 import torch
 from transformers import LlamaConfig, LlamaPreTrainedModel
@@ -29,6 +29,31 @@ import ipdb
 
 logger = logging.get_logger(__name__)
 _CONFIG_FOR_DOC = "LlamaConfig"
+
+
+import os
+import matplotlib.pyplot as plt
+import numpy as np
+
+def save_heatmap(array, batch_idx, layer_id, cmap='viridis', output_dir='heatmaps'):
+    # 构造分层路径，例如 heatmaps/1/
+    batch_dir = os.path.join(output_dir, str(batch_idx))
+    os.makedirs(batch_dir, exist_ok=True)
+
+    filename = f"{layer_id}.png"
+    filepath = os.path.join(batch_dir, filename)
+
+    plt.figure(figsize=(10, 8))
+    plt.imshow(array, cmap=cmap, aspect='auto')
+    plt.colorbar(label='Value')
+    plt.title(f'Heatmap: Batch {batch_idx}, Layer {layer_id}')
+    plt.xlabel('Columns')
+    plt.ylabel('Rows')
+    plt.tight_layout()
+    plt.savefig(filepath)
+    plt.close()
+    return filepath
+
 
 class LlamaModel(LlamaPreTrainedModel):
     """
@@ -81,11 +106,12 @@ class LlamaModel(LlamaPreTrainedModel):
         use_cache = use_cache if use_cache is not None else self.config.use_cache
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
-        if (input_ids is None) ^ (inputs_embeds is not None):
-            raise ValueError(
-                "You cannot specify both input_ids and inputs_embeds at the same time, and must specify either one"
-            )
+        # if (input_ids is None) ^ (inputs_embeds is not None):
+        #     raise ValueError(
+        #         "You cannot specify both input_ids and inputs_embeds at the same time, and must specify either one"
+        #     )
 
+        
         if self.gradient_checkpointing and self.training and use_cache:
             logger.warning_once(
                 "`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`."
@@ -130,8 +156,9 @@ class LlamaModel(LlamaPreTrainedModel):
         all_self_attns = () if output_attentions else None
         next_decoder_cache = None
 
-        # ipdb.set_trace()
-        for decoder_layer in self.layers:
+        
+        attn_weights = None
+        for layer_idx, decoder_layer in enumerate(self.layers):
             if output_hidden_states:
                 all_hidden_states += (hidden_states,)
 
@@ -160,6 +187,21 @@ class LlamaModel(LlamaPreTrainedModel):
                 )
 
             hidden_states = layer_outputs[0]
+            
+            
+            NUM_IMG_TOKENS=576
+            for batch_idx in range(3):
+                # ipdb.set_trace()            
+                pos = input_ids[batch_idx].tolist().index(-200)
+                true_vis_attn_weight = layer_outputs[1][batch_idx, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
+
+                gen_pos = input_ids[batch_idx+1].tolist().index(-200)
+                gen_vis_attn_weight = layer_outputs[1][batch_idx+1, :, -1, gen_pos:gen_pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
+                
+                att_map = true_vis_attn_weight / gen_vis_attn_weight
+                save_heatmap(att_map, batch_idx, layer_idx)
+
+            attn_weights = layer_outputs[1] if output_hidden_states else None
 
             if use_cache:
                 next_decoder_cache = layer_outputs[2 if output_attentions else 1]
@@ -167,6 +209,8 @@ class LlamaModel(LlamaPreTrainedModel):
             if output_attentions:
                 all_self_attns += (layer_outputs[1],)
 
+        exit()
+        
         hidden_states = self.norm(hidden_states)
 
         # add hidden states from the last decoder layer

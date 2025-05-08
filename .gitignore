@@ -5,3 +5,4 @@ lib
 results/ckpts
 results/jsons
 results/*.log
+heatmaps
