@@ -20,8 +20,8 @@ import torch.nn as nn
 
 from transformers import AutoConfig, AutoModelForCausalLM, LlamaConfig
                          
-# from transformers import LlamaModel, LlamaForCausalLM 
-from .base_llama import LlamaModel, LlamaForCausalLM
+from transformers import LlamaModel, LlamaForCausalLM 
+# from .base_llama import LlamaModel, LlamaForCausalLM
 
 from transformers.modeling_outputs import CausalLMOutputWithPast
 from transformers.generation.utils import GenerateOutput

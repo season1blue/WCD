@@ -25,7 +25,7 @@ def train(args, model, loss_fn, dataloader, device, lora_output_dir):
     optimizer = AdamW(model.parameters(), lr=1e-5)
 
     for epoch in range(args.epochs):
-        pbar = tqdm(enumerate(dataloader), total=len(dataloader), desc=f"Epoch {epoch}")
+        pbar = tqdm(enumerate(dataloader), total=len(dataloader), desc=f"Epoch {epoch}", ncols=100)
         for step, batch in pbar:
 
             batch = {k: v.to(device) for k, v in batch.items()}
@@ -117,6 +117,14 @@ def main(args):
         task_type="CAUSAL_LM",
     )
     # ipdb.set_trace()
+    # 是否可用
+    print("CUDA available:", torch.cuda.is_available())
+
+    # 当前使用的 GPU 设备
+    if torch.cuda.is_available():
+        print("Current device:", torch.cuda.current_device())
+        print("Device name:", torch.cuda.get_device_name(torch.cuda.current_device()))
+        print("GPU count:", torch.cuda.device_count())
     
     model.to(torch.bfloat16)
     vision_tower = model.get_vision_tower()

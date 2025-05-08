@@ -4,3 +4,4 @@ transformer*
 lib
 results/ckpts
 results/jsons
+results/*.log
