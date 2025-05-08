@@ -14,4 +14,4 @@ python _train.py \
     --epochs 3 \
     --lora_name $lora_name \
     --batch_size $batch_size \
-    --is_eval 1
+    --is_eval 0
