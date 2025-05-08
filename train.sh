@@ -3,9 +3,9 @@ export CUDA_VISIBLE_DEVICES=1
 task="textvqa"
 model="llava_new"
 method="rel_att"
-max_sample=500
+max_sample=10
 batch_size=4
-lora_name=${task}-"base-0506"
+lora_name=${task}-"train-0508"
 
 python _train.py \
     --task $task \

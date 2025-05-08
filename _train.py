@@ -8,7 +8,7 @@ from PIL import Image
 from datasets import load_dataset
 from peft import get_peft_model, LoraConfig, TaskType  # 加入 PEFT
 
-from methods.utils.dataset import TrainDataset
+from methods.utils.dataset import TrainDataset, CustomDataCollatorForSupervisedDataset
 from methods.utils.token_loss import AdaLoss # type: ignore
 # from methods.my_llava import MyLlava
 from llava.model import LlavaLlamaForCausalLM
@@ -19,7 +19,7 @@ import ipdb
 from tqdm import tqdm
 from _eval import _eval
 
-def train(args, model, loss_fn, dataloader, processor, device, lora_output_dir):
+def train(args, model, loss_fn, dataloader, device, lora_output_dir):
     model.train()
     optimizer = AdamW(model.parameters(), lr=1e-5)
 
@@ -30,20 +30,21 @@ def train(args, model, loss_fn, dataloader, processor, device, lora_output_dir):
             batch = {k: v.to(device) for k, v in batch.items()}
             outputs = model(**batch)
 
-            ada_loss = loss_fn(outputs["logits"], outputs["token_select"])
-            loss = outputs["loss"] + 50 * ada_loss
-            # loss = outputs["loss"]
+            # ada_loss = loss_fn(outputs["logits"], outputs["token_select"])
+            # loss = outputs["loss"] + 50 * ada_loss
+            loss = outputs["loss"].float()
 
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
 
-            pbar.set_postfix({"loss": f"{loss.item():.4f}", "adaloss": f"{ada_loss.item():.4f}"})
+            # pbar.set_postfix({"loss": f"{loss.item():.4f}", "adaloss": f"{ada_loss.item():.4f}"})
+            pbar.set_postfix({"loss": f"{loss.item():.4f}"})
 
         # 每个epoch结束的时候输出
         if args.is_eval > 0:
             print("Start Evaluation")
-            _eval(args, epoch, model, processor)
+            _eval(args, epoch, model)
     # 保存 LoRA adapter
     model.save_pretrained(os.path.join(lora_output_dir, args.lora_name), safe_serialization=False )
     print(f"LoRA adapter saved to {os.path.join(lora_output_dir, args.lora_name)}")
@@ -115,19 +116,28 @@ def main(args):
         task_type="CAUSAL_LM",
     )
     # ipdb.set_trace()
+    
     model.to(torch.bfloat16)
+    vision_tower = model.get_vision_tower()
+    vision_tower.to(dtype=torch.bfloat16)
+    image_processor = vision_tower.image_processor
+    model.get_model().mm_projector.to(dtype=torch.bfloat16)
+        
+        
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
-    
 
 
     # 构建损失函数
     Ada_loss_fn = AdaLoss(base_criterion=torch.nn.CrossEntropyLoss())
 
-    train_dataset = TrainDataset(args.task, args.train_path, args.image_path, processor=processor, max_samples=args.max_sample)
-    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=TrainDataset.collate_fn)
+    train_dataset = TrainDataset(args.task, args.train_path, args.image_path, tokenizer, image_processor, max_samples=args.max_sample)
 
-    train(args, model, Ada_loss_fn, train_dataloader, processor, args.device, args.lora_output_dir)
+    collator = CustomDataCollatorForSupervisedDataset(tokenizer)
+    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collator)
+    
+
+    train(args, model, Ada_loss_fn, train_dataloader, args.device, args.lora_output_dir)
 
 
 if __name__ == "__main__":

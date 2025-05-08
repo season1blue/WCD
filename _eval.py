@@ -41,19 +41,26 @@ from llava.utils import disable_torch_init
 from llava.mm_utils import tokenizer_image_token, process_images, get_model_name_from_path
 
 
-def _eval(args, epoch=None, model=None, processor=None):
+def _eval(args, epoch=None, model=None):
 
+    model_path = args.model_id
+    model_name = get_model_name_from_path(model_path)
     if model is None:
-
-        model_path = args.model_id
-        model_name = get_model_name_from_path(model_path)
         tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, model_base=None, model_name=model_name)
-
-
         if args.lora_name != "NONE":
             ckpt_path = os.path.join("/ai/teacher/ssz/layer_task/mllms_know/results/ckpts", args.lora_name)
             model = PeftModel.from_pretrained(model, ckpt_path, adapter_file="adapter_model.safetensors")
-        
+    else:
+        tokenizer, base_model, image_processor, context_len = load_pretrained_model(model_path, model_base=None, model_name=model_name)
+
+    model.eval()
+    
+    model.to(torch.bfloat16)
+    vision_tower = model.get_vision_tower()
+    vision_tower.to(dtype=torch.bfloat16)
+    image_processor = vision_tower.image_processor
+    model.get_model().mm_projector.to(dtype=torch.bfloat16)
+    
 
     dataset = ImageTextDataset(
         task=args.task,
@@ -65,7 +72,7 @@ def _eval(args, epoch=None, model=None, processor=None):
     if args.task == "textvqa":
         dataloader = DataLoader(
             dataset,
-            batch_size=args.batch_size,
+            batch_size=1,
             shuffle=False,
             collate_fn=custom_collate_fn
             # num_workers=1
@@ -73,7 +80,7 @@ def _eval(args, epoch=None, model=None, processor=None):
     else:
         dataloader = DataLoader(
             dataset,
-            batch_size=args.batch_size,
+            batch_size=1,
             shuffle=False,
             # num_workers=1
         )
@@ -85,6 +92,7 @@ def _eval(args, epoch=None, model=None, processor=None):
         questions = dd["text"]  # batch_size个问题
         image_paths = dd["image_path"]  # batch_size个图片路径
 
+        
 
         prompts = []
         input_ids = []
@@ -107,20 +115,19 @@ def _eval(args, epoch=None, model=None, processor=None):
         # input_ids = torch.nn.utils.rnn.pad_sequence(input_ids, batch_first=True, padding_value=tokenizer.pad_token_id)
 
         image = [Image.open(image_path).convert("RGB") for image_path in image_paths]
-        image_tensor = process_images(image, image_processor, model.config)
-        
+        image_tensor = process_images(image, image_processor, model.config).to(torch.bfloat16)
         
         with torch.inference_mode():
             output_ids = model.generate(
-                input_ids,
-                images=image_tensor.half().cuda(),
+                inputs=input_ids,
+                images=image_tensor.cuda(),
                 image_sizes=[image[0].size],
                 do_sample=True,
                 temperature=0.2,
                 top_p=None,
                 num_beams=1,
                 # no_repeat_ngram_size=3,
-                cache_position=None,
+                # cache_position=None,
                 max_new_tokens=1024,
                 use_cache=True)
 
