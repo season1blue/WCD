@@ -177,6 +177,8 @@ def _eval(args, epoch=None, model=None):
         json.dump(result, f, indent=4)
         f.write('\n')  # 添加换行符
 
+    
+    
 if __name__ == "__main__":
     args = load_args()
     _eval(args)

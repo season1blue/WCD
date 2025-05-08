@@ -350,3 +350,21 @@
     "time": "2025-05-08d 16:59:28",
     "acc": 50.0
 }
+{
+    "version": "textvqa-train-0508",
+    "epoch": 0,
+    "time": "2025-05-08d 18:55:46",
+    "acc": 60.0
+}
+{
+    "version": "textvqa-train-0508",
+    "epoch": 0,
+    "time": "2025-05-08d 18:59:42",
+    "acc": 70.0
+}
+{
+    "version": "textvqa-train-0508",
+    "epoch": 0,
+    "time": "2025-05-08d 19:05:54",
+    "acc": 60.0
+}

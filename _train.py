@@ -19,6 +19,7 @@ import ipdb
 from tqdm import tqdm
 from _eval import _eval
 
+
 def train(args, model, loss_fn, dataloader, device, lora_output_dir):
     model.train()
     optimizer = AdamW(model.parameters(), lr=1e-5)
@@ -41,10 +42,10 @@ def train(args, model, loss_fn, dataloader, device, lora_output_dir):
             # pbar.set_postfix({"loss": f"{loss.item():.4f}", "adaloss": f"{ada_loss.item():.4f}"})
             pbar.set_postfix({"loss": f"{loss.item():.4f}"})
 
-        # 每个epoch结束的时候输出
-        if args.is_eval > 0:
-            print("Start Evaluation")
-            _eval(args, epoch, model)
+
+    if args.is_eval > 0:
+        print("Start Evaluation")
+        _eval(args, epoch, model)
     # 保存 LoRA adapter
     model.save_pretrained(os.path.join(lora_output_dir, args.lora_name), safe_serialization=False )
     print(f"LoRA adapter saved to {os.path.join(lora_output_dir, args.lora_name)}")
