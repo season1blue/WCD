@@ -24,6 +24,9 @@ from transformers.models.llama.modeling_llama import LlamaRotaryEmbedding, LLAMA
 from transformers.modeling_attn_mask_utils import AttentionMaskConverter
 from transformers.generation import GenerationMixin
 from typing import List, Optional, Tuple, Union
+from scipy.spatial.distance import jensenshannon
+
+from .generate import MyGenerationMixin
 
 import ipdb
 
@@ -35,13 +38,16 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-def save_heatmap(array, batch_idx, layer_id, cmap='viridis', output_dir='heatmaps'):
+
+
+def save_heatmap_with_array(array, batch_idx, layer_id, cmap='viridis', output_dir='heatmaps'):
     # 构造分层路径，例如 heatmaps/1/
-    batch_dir = os.path.join(output_dir, str(batch_idx))
+    batch_dir = os.path.join(output_dir, f"{str(batch_idx)}")
     os.makedirs(batch_dir, exist_ok=True)
 
-    filename = f"{layer_id}.png"
-    filepath = os.path.join(batch_dir, filename)
+    filename_base = f"{layer_id}"
+    image_path = os.path.join(batch_dir, f"{filename_base}.png")
+    array_path = os.path.join(batch_dir, f"{filename_base}.txt")
 
     plt.figure(figsize=(10, 8))
     plt.imshow(array, cmap=cmap, aspect='auto')
@@ -50,9 +56,13 @@ def save_heatmap(array, batch_idx, layer_id, cmap='viridis', output_dir='heatmap
     plt.xlabel('Columns')
     plt.ylabel('Rows')
     plt.tight_layout()
-    plt.savefig(filepath)
+    plt.savefig(image_path)
     plt.close()
-    return filepath
+
+    # 保存数值数组为 .txt
+    np.savetxt(array_path, array, fmt='%.8f')
+    
+    return image_path, array_path
 
 
 class LlamaModel(LlamaPreTrainedModel):
@@ -188,20 +198,20 @@ class LlamaModel(LlamaPreTrainedModel):
 
             hidden_states = layer_outputs[0]
             
-            
-            NUM_IMG_TOKENS=576
-            for batch_idx in range(3):
-                # ipdb.set_trace()            
-                pos = input_ids[batch_idx].tolist().index(-200)
-                true_vis_attn_weight = layer_outputs[1][batch_idx, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
+            # NUM_IMG_TOKENS=576
+            # for batch_idx in range(3):
+            #     # ipdb.set_trace()            
+            #     pos = input_ids[batch_idx].tolist().index(-200)
+            #     true_vis_attn_weight = layer_outputs[1][batch_idx, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
 
-                gen_pos = input_ids[batch_idx+1].tolist().index(-200)
-                gen_vis_attn_weight = layer_outputs[1][batch_idx+1, :, -1, gen_pos:gen_pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
+            #     gen_pos = input_ids[batch_idx+1].tolist().index(-200)
+            #     gen_vis_attn_weight = layer_outputs[1][batch_idx+1, :, -1, gen_pos:gen_pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
                 
-                att_map = true_vis_attn_weight / gen_vis_attn_weight
-                save_heatmap(att_map, batch_idx, layer_idx)
+            #     # att_map = compute_jsd(true_vis_attn_weight, gen_vis_attn_weight)
+            #     att_map = true_vis_attn_weight - gen_vis_attn_weight
+            #     save_heatmap_with_array(att_map, batch_idx, layer_idx)
 
-            attn_weights = layer_outputs[1] if output_hidden_states else None
+            # attn_weights = layer_outputs[1] if output_hidden_states else None
 
             if use_cache:
                 next_decoder_cache = layer_outputs[2 if output_attentions else 1]
@@ -209,7 +219,6 @@ class LlamaModel(LlamaPreTrainedModel):
             if output_attentions:
                 all_self_attns += (layer_outputs[1],)
 
-        exit()
         
         hidden_states = self.norm(hidden_states)
 
@@ -296,10 +305,11 @@ class LlamaModel(LlamaPreTrainedModel):
 
         return causal_mask
 
-class LlamaForCausalLM(LlamaPreTrainedModel, GenerationMixin):
+class LlamaForCausalLM(MyGenerationMixin, LlamaPreTrainedModel):
     _tied_weights_keys = ["lm_head.weight"]
 
     def __init__(self, config):
+
         super().__init__(config)
         self.model = LlamaModel(config)
         self.vocab_size = config.vocab_size
@@ -434,6 +444,11 @@ class LlamaForCausalLM(LlamaPreTrainedModel, GenerationMixin):
             attentions=outputs.attentions,
         )
 
+    # def generate(self, inputs = None, generation_config = None, logits_processor = None, stopping_criteria = None, prefix_allowed_tokens_fn = None, synced_gpus = None, assistant_model = None, streamer = None, negative_prompt_ids = None, negative_prompt_attention_mask = None, **kwargs):
+    #     ipdb.set_trace()
+    #     return super(MyGenerationMixin).generate(inputs, generation_config, logits_processor, stopping_criteria, prefix_allowed_tokens_fn, synced_gpus, assistant_model, streamer, negative_prompt_ids, negative_prompt_attention_mask, **kwargs)
+
+        
     def prepare_inputs_for_generation(
         self,
         input_ids,

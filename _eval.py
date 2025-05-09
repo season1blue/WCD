@@ -40,6 +40,8 @@ from llava.model.builder import load_pretrained_model
 from llava.utils import disable_torch_init
 from llava.mm_utils import tokenizer_image_token, process_images, get_model_name_from_path
 
+from transformers import GenerationConfig
+
 
 def _eval(args, epoch=None, model=None):
 
@@ -117,9 +119,16 @@ def _eval(args, epoch=None, model=None):
         image = [Image.open(image_path).convert("RGB") for image_path in image_paths]
         image_tensor = process_images(image, image_processor, model.config).to(torch.bfloat16)
         
+        
+        
+        generation_config = GenerationConfig.from_model_config(model.config)
+        # generation_config.generation_mode = "dola_generation"  # 你可也用枚举或字符串标记
+        generation_config.dola_layers = "low"
+
         with torch.inference_mode():
             output_ids = model.generate(
                 inputs=input_ids,
+                generation_config=generation_config,
                 images=image_tensor.cuda(),
                 image_sizes=[image[0].size],
                 do_sample=True,
@@ -129,7 +138,8 @@ def _eval(args, epoch=None, model=None):
                 # no_repeat_ngram_size=3,
                 # cache_position=None,
                 max_new_tokens=1024,
-                use_cache=True)
+                use_cache=True
+            )
 
         multi_generations = [
             i.strip()
