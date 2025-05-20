@@ -103,7 +103,6 @@ if is_accelerate_available():
 
 
 
-
 @dataclass
 class GenerateDecoderOnlyOutput(ModelOutput):
     """
@@ -315,6 +314,81 @@ ContrastiveSearchOutput = Union[ContrastiveSearchEncoderDecoderOutput, Contrasti
 GenerateNonBeamOutput = Union[GenerateDecoderOnlyOutput, GenerateEncoderDecoderOutput]
 GenerateBeamOutput = Union[GenerateBeamDecoderOnlyOutput, GenerateBeamEncoderDecoderOutput]
 GenerateOutput = Union[GenerateNonBeamOutput, GenerateBeamOutput]
+
+
+
+
+def apply_attention_weighting_to_image_embeds(inputs_embeds, attn, image_start_pos, eps=1e-6, temperature=1.0):
+    """
+    inputs_embeds: (1, seq_len, dim)  e.g., (1, 637, 4096)
+    attn: (24, 24)  - attention scores for image patches
+    image_start_pos: int - where the image embeddings start
+    eps: small value to prevent division by zero
+    temperature: scaling factor for sharpening or softening attention
+    """
+    
+    # Convert to torch.Tensor if necessary
+    if isinstance(attn, np.ndarray):
+        attn = torch.tensor(attn, dtype=torch.float32, device=inputs_embeds.device)
+    elif isinstance(attn, torch.Tensor) and attn.device != inputs_embeds.device:
+        attn = attn.to(inputs_embeds.device)
+        
+    # Flatten and normalize attention
+    attn_flat = attn.flatten()  # (576,)
+    attn_weights = attn_flat / (attn_flat.sum() + eps)  # L1 norm
+    attn_weights = attn_weights / (attn_weights.max() + eps)  # normalize to [0,1]
+    
+    # Optional: sharpen or smooth weights
+    attn_weights = F.softmax(attn_weights / temperature, dim=0)  # softmax-normalized weights
+
+    # Apply weights to image embeddings
+    image_embeds = inputs_embeds[0, image_start_pos:image_start_pos+576, :]  # (576, dim)
+    weighted_embeds = image_embeds * attn_weights.unsqueeze(-1)  # (576, dim)
+
+    # Replace back to inputs_embeds
+    inputs_embeds[0, image_start_pos:image_start_pos+576, :] = weighted_embeds
+
+    return inputs_embeds
+
+
+import torch
+
+def apply_soft_mask_to_image_embeds(inputs_embeds, attn, image_start_pos, mask_ratio=0.3, mask_scale=0.0):
+    """
+    inputs_embeds: (1, seq_len, dim)  e.g., (1, 637, 4096)
+    attn: (24, 24)  - image patch attention
+    image_start_pos: int - where the image embeddings start
+    mask_ratio: float - e.g., 0.3 means mask lowest 30% attention patches
+    mask_scale: float - scaling factor for masked tokens (soft mask, 0.0 ~ 1.0)
+    """
+    if isinstance(attn, np.ndarray):
+        attn = torch.tensor(attn, dtype=torch.float32, device=inputs_embeds.device)
+    elif isinstance(attn, torch.Tensor) and attn.device != inputs_embeds.device:
+        attn = attn.to(inputs_embeds.device)
+
+    # Flatten attention to 576
+    attn_flat = attn.flatten()  # (576,)
+
+    # Calculate threshold
+    num_mask = int(mask_ratio * len(attn_flat))
+    threshold = torch.topk(attn_flat, k=num_mask, largest=False).values[-1]
+
+    # Generate mask: 1 for keep, 0 for mask
+    keep_mask = (attn_flat > threshold).float()  # (576,)
+    # Optional: Use soft mask instead of binary
+    soft_mask = keep_mask + (1 - keep_mask) * mask_scale  # (576,)  1.0 for keep, scale for mask
+
+    # Extract image embeds
+    image_embeds = inputs_embeds[0, image_start_pos:image_start_pos+576, :]  # (576, 4096)
+
+    # Apply soft mask
+    image_embeds_masked = image_embeds * soft_mask.unsqueeze(-1)  # (576, 4096)
+
+    # Replace back
+    inputs_embeds[0, image_start_pos:image_start_pos+576, :] = image_embeds_masked
+
+    return inputs_embeds
+
 
 import ipdb
 class MyGenerationMixin:
@@ -1193,11 +1267,11 @@ class MyGenerationMixin:
             if value is not None and key not in model_args:
                 unused_model_args.append(key)
 
-        if unused_model_args:
-            raise ValueError(
-                f"The following `model_kwargs` are not used by the model: {unused_model_args} (note: typos in the"
-                " generate arguments will also show up in this list)"
-            )
+        # if unused_model_args:
+        #     raise ValueError(
+        #         f"The following `model_kwargs` are not used by the model: {unused_model_args} (note: typos in the"
+        #         " generate arguments will also show up in this list)"
+        #     )
 
     def _validate_generated_length(self, generation_config, input_ids_length, has_default_max_length):
         """Performs validation related to the resulting generated length"""
@@ -1858,6 +1932,11 @@ class MyGenerationMixin:
                 inputs_tensor, model_kwargs, model_input_name, generation_config
             )
 
+        _input_ids = model_kwargs.pop("_input_ids")
+        # if not generation_config.return_dict_in_generate:
+        #     ipdb.set_trace()
+        _general_attention = model_kwargs.pop("_general_attention") if "_general_attention" in model_kwargs.keys() else None
+
         # 5. Prepare `input_ids` which will be used for auto-regressive generation
         if self.config.is_encoder_decoder:
             input_ids, model_kwargs = self._prepare_decoder_input_ids_for_generation(
@@ -1868,7 +1947,10 @@ class MyGenerationMixin:
                 device=inputs_tensor.device,
             )
         else:
+            # HERE
             input_ids = inputs_tensor if model_input_name == "input_ids" else model_kwargs.pop("input_ids")
+
+        
 
         if generation_config.token_healing:
             input_ids = self.heal_tokens(input_ids, tokenizer)
@@ -2005,6 +2087,8 @@ class MyGenerationMixin:
                 generation_config=generation_config,
                 synced_gpus=synced_gpus,
                 streamer=streamer,
+                _input_ids=_input_ids,
+                _general_attention=_general_attention,
                 **model_kwargs,
             )
 
@@ -2301,6 +2385,8 @@ class MyGenerationMixin:
 
         return input_ids
 
+
+
     def _dola_decoding(
         self,
         input_ids: torch.LongTensor,
@@ -2421,23 +2507,65 @@ class MyGenerationMixin:
         if lm_head is None:
             raise ValueError("DoLa is not supported for models that don't have output embeddings.")
 
-        ipdb.set_trace()
+        _input_ids = model_kwargs["_input_ids"]
+        _general_attention = model_kwargs["_general_attention"]
 
+        # 第二轮
+        if not generation_config.return_dict_in_generate and _general_attention is not None:
+            x=0
+            _x_token_general_attention = _general_attention[x]
+            # x 代表新生成的token的位置  
+            # _x_token_general_attention里面有32个attention，每个att代表一层的attention，
+            # 第一层x=0：32*torch.Size([1, 32, 637, 637])， 第二层x=1: 32*torch.Size([1,32,1,638])
+            # ipdb.set_trace()  
+        else:
+            _x_token_general_attention = None
+        
+        NUM_IMG_TOKENS=576
+        pos = _input_ids[0].tolist().index(-200)  # batchsize = 1的时候
+
+        gen_count = 0
         while self._has_unfinished_sequences(this_peer_finished, synced_gpus, device=input_ids.device):
             # prepare model inputs
             model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
+            
+            if gen_count < 1:
+                
+                if not generation_config.return_dict_in_generate and _x_token_general_attention is not None:
+                    ipdb.set_trace()
+                    last_layer_x_token_general_attention = _x_token_general_attention[generation_config.attn_layer_idx] # TODO 暂定最后一层的att
+                    sliced_attn = last_layer_x_token_general_attention[0, :, -1, pos:pos+NUM_IMG_TOKENS]
+                    reshape_attn = sliced_attn.mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
+                
+                    # inputs_embeds_weighted = apply_attention_weighting_to_image_embeds(
+                    #     model_inputs["inputs_embeds"], reshape_attn, image_start_pos=pos, temperature=0.5)
+                    inputs_embeds_masked = apply_soft_mask_to_image_embeds(
+                        model_inputs["inputs_embeds"], reshape_attn, image_start_pos=pos, mask_ratio=0.2, mask_scale=0.1)
+                    
+                    model_inputs["inputs_embeds"] = inputs_embeds_masked 
+                
+                # forward pass to get next token
+                outputs = self(
+                    **model_inputs,
+                    return_dict=True,
+                    output_attentions=output_attentions,
+                    output_hidden_states=True,
+                    _general_attention=_x_token_general_attention,
+                )
+            else:
+                outputs = self(
+                    **model_inputs,
+                    return_dict=True,
+                    output_attentions=output_attentions,
+                    output_hidden_states=True,
+                )   
 
-            # forward pass to get next token
-            outputs = self(
-                **model_inputs,
-                return_dict=True,
-                output_attentions=output_attentions,
-                output_hidden_states=True,
-            )
+            gen_count += 1
 
             # .float() is needed to retain precision for later logits manipulations
             final_layer_next_token_logits = outputs.logits[:, -1, :].detach().clone().float()
             final_logits = outputs.logits[:, -1, :].float()
+
             candidate_premature_logits = {}
             for candidate_premature_layer in candidate_premature_layers:
                 candidate_premature_logits[candidate_premature_layer] = lm_head(
@@ -2447,12 +2575,31 @@ class MyGenerationMixin:
             if synced_gpus and this_peer_finished:
                 continue  # don't waste resources running the code we don't need
 
-            next_token_logits = _dola_select_contrast(
-                candidate_premature_layers, candidate_premature_logits, final_logits
-            )
-            # pre-process distribution
-            next_token_scores = logits_processor(input_ids, next_token_logits)
+            if generation_config.output_attentions:
+                # NEW ADD
+                final_attn = outputs.attentions[-1][0, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).to(final_logits.device).detach().cpu().clone()
 
+                candidate_premature_attentions = {}
+                for layer_id in candidate_premature_layers:
+                    # 取该层最后一个 token 的注意力分布
+                    attn = outputs.attentions[layer_id]  # shape: (batch, heads, T, T)
+                    # 如果只想看最后一个 token 的注意力，可以这样取：
+                    attn_last_token = attn[0, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).to(final_logits.device)  # shape: (batch, heads, seq_len)  # batchsize=1的时候
+                    candidate_premature_attentions[layer_id] = attn_last_token.detach().cpu().clone()
+            
+                # 修改版
+                next_token_logits, premature_layer = _dola_select_contrast_att(
+                    candidate_premature_layers, candidate_premature_logits, candidate_premature_attentions, final_attn, final_logits
+                )
+            # 原版
+            else:
+                next_token_logits, premature_layer = _dola_select_contrast(
+                    candidate_premature_layers, candidate_premature_logits, final_logits
+                )
+                
+                
+            next_token_scores = logits_processor(input_ids, next_token_logits)
+            
             # Store scores, attentions and hidden_states when required
             if return_dict_in_generate:
                 if output_scores:
@@ -2496,10 +2643,14 @@ class MyGenerationMixin:
             # stop when each sentence is finished
             unfinished_sequences = unfinished_sequences & ~stopping_criteria(input_ids, scores)
             this_peer_finished = unfinished_sequences.max() == 0
-
+        
+        
+        # ipdb.set_trace()
+        
         if streamer is not None:
             streamer.end()
 
+        
         if return_dict_in_generate:
             return GenerateDecoderOnlyOutput(
                 sequences=input_ids,
@@ -4533,4 +4684,43 @@ def _dola_select_contrast(
     base_logits = candidate_premature_logits[premature_layer]
     final_logits, base_logits = _relative_top_filter(final_logits, base_logits)
     logits = final_logits - base_logits
-    return logits
+    return logits, premature_layer
+
+
+
+from scipy.spatial.distance import jensenshannon
+
+def _dola_select_contrast_att(
+    candidate_premature_layers: List[int],
+    candidate_premature_logits: Dict[int, torch.FloatTensor],
+    candidate_premature_attentions,
+    final_attn,
+    final_logits: torch.FloatTensor,
+) -> torch.FloatTensor:
+    if len(candidate_premature_layers) == 1:
+        base_logits = candidate_premature_logits[candidate_premature_layers[0]]
+        final_logits, base_logits = _relative_top_filter(final_logits, base_logits)
+        logits = final_logits - base_logits
+        return logits
+
+    
+    # 1. Stacking all premature_layers into a new dimension
+    stacked_premature_layers = torch.stack([candidate_premature_attentions[i] for i in candidate_premature_layers], dim=0)  
+    
+    p = final_attn / final_attn.sum()
+    jsds = []
+
+    for i in range(stacked_premature_layers.size(0)):
+        q = stacked_premature_layers[i]
+        q = q / q.sum()
+        jsd = jensenshannon(p.numpy(), q.numpy(), base=2.0) ** 2
+        jsds.append(jsd)
+
+    max_diff_idx = int(np.argmax(jsds))
+
+    premature_layer = candidate_premature_layers[max_diff_idx]
+
+    base_logits = candidate_premature_logits[premature_layer]
+    final_logits, base_logits = _relative_top_filter(final_logits, base_logits)
+    logits = final_logits - base_logits
+    return logits, premature_layer

@@ -20,7 +20,8 @@ from transformers.modeling_outputs import (
     BaseModelOutputWithPast,
     CausalLMOutputWithPast,
 )
-from transformers.models.llama.modeling_llama import LlamaRotaryEmbedding, LLAMA_INPUTS_DOCSTRING, _prepare_4d_causal_attention_mask_with_cache_position
+from transformers.models.llama.modeling_llama import LlamaRotaryEmbedding, LLAMA_INPUTS_DOCSTRING
+
 from transformers.modeling_attn_mask_utils import AttentionMaskConverter
 from transformers.generation import GenerationMixin
 from typing import List, Optional, Tuple, Union
@@ -38,6 +39,62 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
+
+@staticmethod
+def _prepare_4d_causal_attention_mask_with_cache_position(
+    attention_mask: torch.Tensor,
+    sequence_length: int,
+    target_length: int,
+    dtype: torch.dtype,
+    device: torch.device,
+    cache_position: torch.Tensor,
+    batch_size: int,
+    **kwargs,
+):
+    """
+    Creates a causal 4D mask of shape `(batch_size, 1, query_length, key_value_length)` from a 2D mask of shape
+    `(batch_size, key_value_length)`, or if the input `attention_mask` is already 4D, do nothing.
+
+    Args:
+        attention_mask (`torch.Tensor`):
+            A 2D attention mask of shape `(batch_size, key_value_length)` or a 4D attention mask of shape
+            `(batch_size, 1, query_length, key_value_length)`.
+        sequence_length (`int`):
+            The sequence length being processed.
+        target_length (`int`):
+            The target length: when generating with static cache, the mask should be as long as the static cache,
+            to account for the 0 padding, the part of the cache that is not filled yet.
+        dtype (`torch.dtype`):
+            The dtype to use for the 4D attention mask.
+        device (`torch.device`):
+            The device to plcae the 4D attention mask on.
+        cache_position (`torch.Tensor`):
+            Indices depicting the position of the input sequence tokens in the sequence.
+        batch_size (`torch.Tensor`):
+            Batch size.
+    """
+    if attention_mask is not None and attention_mask.dim() == 4:
+        # In this case we assume that the mask comes already in inverted form and requires no inversion or slicing.
+        causal_mask = attention_mask
+    else:
+        min_dtype = torch.finfo(dtype).min
+        causal_mask = torch.full(
+            (sequence_length, target_length), fill_value=min_dtype, dtype=dtype, device=device
+        )
+        if sequence_length != 1:
+            causal_mask = torch.triu(causal_mask, diagonal=1)
+        causal_mask *= torch.arange(target_length, device=device) > cache_position.reshape(-1, 1)
+        causal_mask = causal_mask[None, None, :, :].expand(batch_size, 1, -1, -1)
+        if attention_mask is not None:
+            causal_mask = causal_mask.clone()  # copy to contiguous memory for in-place edit
+            mask_length = attention_mask.shape[-1]
+            padding_mask = causal_mask[:, :, :, :mask_length] + attention_mask[:, None, None, :]
+            padding_mask = padding_mask == 0
+            causal_mask[:, :, :, :mask_length] = causal_mask[:, :, :, :mask_length].masked_fill(
+                padding_mask, min_dtype
+            )
+
+    return causal_mask
 
 
 def save_heatmap_with_array(array, batch_idx, layer_id, cmap='viridis', output_dir='heatmaps'):
@@ -108,6 +165,7 @@ class LlamaModel(LlamaPreTrainedModel):
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
         cache_position: Optional[torch.LongTensor] = None,
+        _general_attention=None,
     ) -> Union[Tuple, BaseModelOutputWithPast]:
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_hidden_states = (
@@ -120,7 +178,6 @@ class LlamaModel(LlamaPreTrainedModel):
         #     raise ValueError(
         #         "You cannot specify both input_ids and inputs_embeds at the same time, and must specify either one"
         #     )
-
         
         if self.gradient_checkpointing and self.training and use_cache:
             logger.warning_once(
@@ -166,11 +223,18 @@ class LlamaModel(LlamaPreTrainedModel):
         all_self_attns = () if output_attentions else None
         next_decoder_cache = None
 
-        
-        attn_weights = None
+        # if _general_attention is not None:
+        #     ipdb.set_trace()
+        previous_attn_diff = None
         for layer_idx, decoder_layer in enumerate(self.layers):
+            
             if output_hidden_states:
                 all_hidden_states += (hidden_states,)
+
+
+            # previous_attn_diff输入给decode_layer
+            # if _general_attention is not None:
+            #     ipdb.set_trace()
 
             if self.gradient_checkpointing and self.training:
                 layer_outputs = self._gradient_checkpointing_func(
@@ -194,9 +258,17 @@ class LlamaModel(LlamaPreTrainedModel):
                     use_cache=use_cache,
                     cache_position=cache_position,
                     position_embeddings=position_embeddings,
+                    previous_attn_diff=previous_attn_diff,
                 )
 
             hidden_states = layer_outputs[0]
+            
+            curr_task_attention = layer_outputs[1]
+            
+            # if _general_attention is not None:
+            #     curr_general_attention = _general_attention[layer_idx]
+            #     previous_attn_diff = curr_task_attention - curr_general_attention
+
             
             # NUM_IMG_TOKENS=576
             # for batch_idx in range(3):
@@ -352,6 +424,7 @@ class LlamaForCausalLM(MyGenerationMixin, LlamaPreTrainedModel):
         return_dict: Optional[bool] = None,
         cache_position: Optional[torch.LongTensor] = None,
         num_logits_to_keep: int = 0,
+        _general_attention = None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
         r"""
         Args:
@@ -389,6 +462,8 @@ class LlamaForCausalLM(MyGenerationMixin, LlamaPreTrainedModel):
         )
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
+
+
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
         outputs = self.model(
             input_ids=input_ids,
@@ -401,7 +476,10 @@ class LlamaForCausalLM(MyGenerationMixin, LlamaPreTrainedModel):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
             cache_position=cache_position,
+            _general_attention=_general_attention
         )
+        
+        
 
         hidden_states = outputs[0]
         if self.config.pretraining_tp > 1:

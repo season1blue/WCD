@@ -38,3 +38,8 @@ uvloop==0.20.0
 watchfiles==0.24.0
 webcolors==24.8.0
 wheel==0.45.1
+# transformers==4.37.2
+qwen-vl-utils
+peft==0.10.0
+ipdb
+SentencePiece

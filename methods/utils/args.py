@@ -61,6 +61,11 @@ def load_args():
     parser.add_argument("--ckpt_path", type=str, default="")
     parser.add_argument("--is_eval", type=int, default=0)
     
+    parser.add_argument("--attn_layer_idx", type=int, default=-1)
+    parser.add_argument("--result_path", type=str)
+    
+    
+    
     
     args = parser.parse_args()
 

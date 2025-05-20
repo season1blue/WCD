@@ -49,9 +49,9 @@ def _eval(args, epoch=None, model=None):
     model_name = get_model_name_from_path(model_path)
     if model is None:
         tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, model_base=None, model_name=model_name)
-        if args.lora_name != "NONE":
-            ckpt_path = os.path.join("/ai/teacher/ssz/layer_task/mllms_know/results/ckpts", args.lora_name)
-            model = PeftModel.from_pretrained(model, ckpt_path, adapter_file="adapter_model.safetensors")
+        # if args.lora_name != "NONE":
+        #     ckpt_path = os.path.join("/ai/teacher/ssz/layer_task/mllms_know/results/ckpts", args.lora_name)
+        #     model = PeftModel.from_pretrained(model, ckpt_path, adapter_file="adapter_model.safetensors")
     else:
         tokenizer, base_model, image_processor, context_len = load_pretrained_model(model_path, model_base=None, model_name=model_name)
 
@@ -88,13 +88,74 @@ def _eval(args, epoch=None, model=None):
         )
 
     new_datas = []
+    
+    generation_config = GenerationConfig.from_model_config(model.config)
+    # generation_config.generation_mode = "dola_generation"  # 你可也用枚举或字符串标记
+    generation_config.dola_layers = "low"
+    generation_config.attn_layer_idx = args.attn_layer_idx
+
+    generation_config.output_attentions = True
+    generation_config.return_dict_in_generate = True
+
+    
 
     
     for dd in tqdm(dataloader, desc="Processing", ncols=100):
         questions = dd["text"]  # batch_size个问题
         image_paths = dd["image_path"]  # batch_size个图片路径
 
+        image = [Image.open(image_path).convert("RGB") for image_path in image_paths]
+        image_tensor = process_images(image, image_processor, model.config).to(torch.bfloat16)
+
+
         
+        if generation_config.return_dict_in_generate:
+            # PRE general
+            pre_general_question = 'Write a general description of the image.'
+            if model.config.mm_use_im_start_end:
+                qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + 'Answer the question using a single word or phrase \n' + pre_general_question
+            else:
+                qs =  DEFAULT_IMAGE_TOKEN + '\n' + 'Answer the question using a single word or phrase \n' + pre_general_question
+
+            conv = conv_templates["llava_v1"].copy()
+            conv.append_message(conv.roles[0], qs)
+            conv.append_message(conv.roles[1], None)
+            prompt = conv.get_prompt()
+
+            input_id = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').cuda().unsqueeze(0)
+            
+            with torch.inference_mode():
+                output_dict = model.generate(
+                    inputs=input_id,
+                    generation_config=generation_config,
+                    images=image_tensor.cuda(),
+                    image_sizes=[image[0].size],
+                    do_sample=True,
+                    temperature=0.2,
+                    top_p=None,
+                    num_beams=1,
+                    # no_repeat_ngram_size=3,
+                    # cache_position=None,
+                    max_new_tokens=1024,
+                    use_cache=True,
+                    general_attention=None
+                )
+                
+                # output_dict如下：
+            # return GenerateDecoderOnlyOutput(
+            #         sequences=input_ids,
+            #         scores=scores,
+            #         logits=raw_logits,
+            #         attentions=decoder_attentions,
+            #         hidden_states=decoder_hidden_states,
+            #         past_key_values=model_kwargs.get("past_key_values"),
+            #     )
+            general_output_ids = output_dict.sequences
+            general_attention = output_dict.attentions
+        else:
+            general_attention = None
+            
+        # ---------
 
         prompts = []
         input_ids = []
@@ -115,16 +176,9 @@ def _eval(args, epoch=None, model=None):
             input_ids = input_id.unsqueeze(0)
 
         # input_ids = torch.nn.utils.rnn.pad_sequence(input_ids, batch_first=True, padding_value=tokenizer.pad_token_id)
-
-        image = [Image.open(image_path).convert("RGB") for image_path in image_paths]
-        image_tensor = process_images(image, image_processor, model.config).to(torch.bfloat16)
         
+        generation_config.return_dict_in_generate = False
         
-        
-        generation_config = GenerationConfig.from_model_config(model.config)
-        # generation_config.generation_mode = "dola_generation"  # 你可也用枚举或字符串标记
-        generation_config.dola_layers = "low"
-
         with torch.inference_mode():
             output_ids = model.generate(
                 inputs=input_ids,
@@ -138,7 +192,8 @@ def _eval(args, epoch=None, model=None):
                 # no_repeat_ngram_size=3,
                 # cache_position=None,
                 max_new_tokens=1024,
-                use_cache=True
+                use_cache=True,
+                _general_attention=general_attention if general_attention is not None else None,
             )
 
         multi_generations = [
@@ -180,7 +235,7 @@ def _eval(args, epoch=None, model=None):
         'time': datetime.now().strftime("%Y-%m-%dd %H:%M:%S"),
         'acc': acc,
     }
-    report_path = os.path.join(args.save_path, "result_all.json")
+    report_path = os.path.join(args.save_path, args.result_path)
 
     print(f"Acc: {acc} write into {report_path}")
     with open(report_path, 'a') as f:
