@@ -22,3 +22,309 @@
     "time": "2025-05-20d 23:49:43",
     "acc": 71.14
 }
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 10:56:01",
+    "acc": 58.55
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:01:07",
+    "acc": 58.9
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:10:40",
+    "acc": 59.4
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:14:18",
+    "acc": 58.2
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:17:48",
+    "acc": 58.7
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:23:36",
+    "acc": 57.9
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:26:39",
+    "acc": 58.9
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:29:38",
+    "acc": 57.6
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:32:36",
+    "acc": 58.1
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:35:54",
+    "acc": 58.9
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:39:34",
+    "acc": 58.7
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:43:11",
+    "acc": 59.2
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:46:07",
+    "acc": 58.8
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:49:10",
+    "acc": 58.6
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:52:08",
+    "acc": 59.0
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:55:05",
+    "acc": 58.8
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 11:58:00",
+    "acc": 58.6
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:01:12",
+    "acc": 58.1
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:04:02",
+    "acc": 58.8
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:06:59",
+    "acc": 58.9
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:09:58",
+    "acc": 57.6
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:12:56",
+    "acc": 57.9
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:16:13",
+    "acc": 59.3
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:19:13",
+    "acc": 58.9
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:22:29",
+    "acc": 58.4
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:25:28",
+    "acc": 58.9
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:28:25",
+    "acc": 58.9
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:31:42",
+    "acc": 58.1
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:35:02",
+    "acc": 57.9
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:38:05",
+    "acc": 58.7
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:41:25",
+    "acc": 58.4
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:44:44",
+    "acc": 58.2
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:47:41",
+    "acc": 58.2
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:50:50",
+    "acc": 58.3
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:53:46",
+    "acc": 58.5
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:56:43",
+    "acc": 58.1
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 12:59:40",
+    "acc": 58.6
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 14:43:31",
+    "acc": 58.5
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 15:11:47",
+    "acc": 56.0
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 15:15:47",
+    "acc": 58.3
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 15:28:27",
+    "acc": 56.1
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 15:50:17",
+    "acc": 59.64
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 16:03:29",
+    "acc": 59.22
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 16:18:44",
+    "acc": 59.24
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 16:35:38",
+    "acc": 59.68
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 16:50:19",
+    "acc": 59.76
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 17:08:53",
+    "acc": 59.68
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 17:40:55",
+    "acc": 59.12
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 18:05:58",
+    "acc": 59.28
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 18:23:23",
+    "acc": 59.84
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 21:01:55",
+    "acc": 59.1
+}

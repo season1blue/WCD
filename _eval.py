@@ -94,8 +94,8 @@ def _eval(args, epoch=None, model=None):
     generation_config.attn_layer_idx = args.attn_layer_idx
     generation_config.dola_layers = "low"
 
-    # generation_config.output_attentions = True
-    # generation_config.return_dict_in_generate = True
+    generation_config.output_attentions = True
+    generation_config.return_dict_in_generate = True
 
     
     for dd in tqdm(dataloader, desc="Processing", ncols=100):

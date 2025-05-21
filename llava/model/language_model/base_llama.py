@@ -30,6 +30,10 @@ from scipy.spatial.distance import jensenshannon
 from .generate import MyGenerationMixin
 
 import ipdb
+import numpy as np
+from scipy.spatial.distance import jensenshannon
+
+
 
 logger = logging.get_logger(__name__)
 _CONFIG_FOR_DOC = "LlamaConfig"
@@ -122,6 +126,67 @@ def save_heatmap_with_array(array, batch_idx, layer_id, cmap='viridis', output_d
     return image_path, array_path
 
 
+def find_max_jsd_and_diff(all_attn_weights):
+    reference = all_attn_weights[-1].flatten()
+    reference = reference / reference.sum()  # 归一化
+
+    max_jsd = -1
+    max_idx = -1
+    max_diff = None
+
+    for i in range(len(all_attn_weights) - 1):  # exclude the last
+        candidate = all_attn_weights[i].flatten()
+        candidate = candidate / candidate.sum()
+
+        jsd = jensenshannon(reference, candidate, base=2) ** 2  # JSD是sqrt形式，需要平方
+
+        if jsd > max_jsd:
+            max_jsd = jsd
+            max_idx = i
+            max_diff = all_attn_weights[-1] - all_attn_weights[i]
+    
+    max_diff[max_diff < 0] = 1e-9
+
+    return max_idx, max_diff
+
+
+def apply_soft_mask_to_image_embeds(inputs_embeds, attn, image_start_pos, mask_ratio=0.3, mask_scale=0.0):
+    """
+    inputs_embeds: (1, seq_len, dim)  e.g., (1, 637, 4096)
+    attn: (24, 24)  - image patch attention
+    image_start_pos: int - where the image embeddings start
+    mask_ratio: float - e.g., 0.3 means mask lowest 30% attention patches
+    mask_scale: float - scaling factor for masked tokens (soft mask, 0.0 ~ 1.0)
+    """
+    if isinstance(attn, np.ndarray):
+        attn = torch.tensor(attn, dtype=torch.float32, device=inputs_embeds.device)
+    elif isinstance(attn, torch.Tensor) and attn.device != inputs_embeds.device:
+        attn = attn.to(inputs_embeds.device)
+
+    # Flatten attention to 576
+    attn_flat = attn.flatten()  # (576,)
+
+    # Calculate threshold
+    num_mask = int(mask_ratio * len(attn_flat))
+    threshold = torch.topk(attn_flat, k=num_mask, largest=False).values[-1]
+
+    # Generate mask: 1 for keep, 0 for mask
+    keep_mask = (attn_flat > threshold).float()  # (576,)
+    # Optional: Use soft mask instead of binary
+    soft_mask = keep_mask + (1 - keep_mask) * mask_scale  # (576,)  1.0 for keep, scale for mask
+
+    # Extract image embeds
+    image_embeds = inputs_embeds[0, image_start_pos:image_start_pos+576, :]  # (576, 4096)
+
+    # Apply soft mask
+    image_embeds_masked = image_embeds * soft_mask.unsqueeze(-1)  # (576, 4096)
+
+    # Replace back
+    inputs_embeds[0, image_start_pos:image_start_pos+576, :] = image_embeds_masked
+
+    return inputs_embeds
+
+
 class LlamaModel(LlamaPreTrainedModel):
     """
     Transformer decoder consisting of *config.num_hidden_layers* layers. Each layer is a [`LlamaDecoderLayer`]
@@ -166,6 +231,7 @@ class LlamaModel(LlamaPreTrainedModel):
         return_dict: Optional[bool] = None,
         cache_position: Optional[torch.LongTensor] = None,
         _general_attention=None,
+        image_start_pos=None
     ) -> Union[Tuple, BaseModelOutputWithPast]:
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_hidden_states = (
@@ -221,13 +287,13 @@ class LlamaModel(LlamaPreTrainedModel):
         # decoder layers
         all_hidden_states = () if output_hidden_states else None
         all_self_attns = () if output_attentions else None
+        all_attn_weights = () if output_attentions else None
         next_decoder_cache = None
 
         # if _general_attention is not None:
         #     ipdb.set_trace()
-        previous_attn_diff = None
+        max_jsd_diff = None
         for layer_idx, decoder_layer in enumerate(self.layers):
-            ipdb.set_trace()
             
             if output_hidden_states:
                 all_hidden_states += (hidden_states,)
@@ -236,6 +302,13 @@ class LlamaModel(LlamaPreTrainedModel):
             # previous_attn_diff输入给decode_layer
             # if _general_attention is not None:
             #     ipdb.set_trace()
+
+            # 在生成第一个词的第31层
+            if output_attentions and image_start_pos is not None and layer_idx == 31:
+                masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), max_jsd_diff, image_start_pos=image_start_pos, mask_ratio=0.5, mask_scale=0)
+                hidden_states = masked_hidden_states
+
+            # print(layer_idx, hidden_states.size())
 
             if self.gradient_checkpointing and self.training:
                 layer_outputs = self._gradient_checkpointing_func(
@@ -259,7 +332,6 @@ class LlamaModel(LlamaPreTrainedModel):
                     use_cache=use_cache,
                     cache_position=cache_position,
                     position_embeddings=position_embeddings,
-                    previous_attn_diff=previous_attn_diff,
                 )
 
             hidden_states = layer_outputs[0]
@@ -271,18 +343,18 @@ class LlamaModel(LlamaPreTrainedModel):
             #     previous_attn_diff = curr_task_attention - curr_general_attention
 
             
-            # NUM_IMG_TOKENS=576
-            # for batch_idx in range(3):
-            #     # ipdb.set_trace()            
-            #     pos = input_ids[batch_idx].tolist().index(-200)
-            #     true_vis_attn_weight = layer_outputs[1][batch_idx, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
+            NUM_IMG_TOKENS=576
 
-            #     gen_pos = input_ids[batch_idx+1].tolist().index(-200)
-            #     gen_vis_attn_weight = layer_outputs[1][batch_idx+1, :, -1, gen_pos:gen_pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
+            if output_attentions and image_start_pos is not None:
+                pos = image_start_pos
+                true_vis_attn_weight = layer_outputs[1][0, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
+                all_attn_weights += (true_vis_attn_weight, )
                 
-            #     # att_map = compute_jsd(true_vis_attn_weight, gen_vis_attn_weight)
-            #     att_map = true_vis_attn_weight - gen_vis_attn_weight
-            #     save_heatmap_with_array(att_map, batch_idx, layer_idx)
+                if layer_idx == 30:
+                    max_jsd_idx, max_jsd_diff = find_max_jsd_and_diff(all_attn_weights)                
+            
+
+
 
             # attn_weights = layer_outputs[1] if output_hidden_states else None
 
@@ -426,6 +498,7 @@ class LlamaForCausalLM(MyGenerationMixin, LlamaPreTrainedModel):
         cache_position: Optional[torch.LongTensor] = None,
         num_logits_to_keep: int = 0,
         _general_attention = None,
+        image_start_pos=None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
         r"""
         Args:
@@ -477,7 +550,8 @@ class LlamaForCausalLM(MyGenerationMixin, LlamaPreTrainedModel):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
             cache_position=cache_position,
-            _general_attention=_general_attention
+            _general_attention=_general_attention,
+            image_start_pos=image_start_pos
         )
         
         

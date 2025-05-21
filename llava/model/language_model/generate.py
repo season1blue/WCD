@@ -2550,6 +2550,7 @@ class MyGenerationMixin:
                     output_attentions=output_attentions,
                     output_hidden_states=True,
                     _general_attention=_x_token_general_attention,
+                    image_start_pos=pos,
                 )
             else:
                 outputs = self(
@@ -2557,6 +2558,7 @@ class MyGenerationMixin:
                     return_dict=True,
                     output_attentions=output_attentions,
                     output_hidden_states=True,
+                    image_start_pos=None
                 )   
 
             gen_count += 1
@@ -2574,7 +2576,7 @@ class MyGenerationMixin:
             if synced_gpus and this_peer_finished:
                 continue  # don't waste resources running the code we don't need
 
-            if generation_config.output_attentions:
+            if generation_config.output_attentions and False:
                 # NEW ADD
                 final_attn = outputs.attentions[-1][0, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).to(final_logits.device).detach().cpu().clone()
 
