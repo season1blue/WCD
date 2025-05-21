@@ -2532,7 +2532,6 @@ class MyGenerationMixin:
             if gen_count < 1:
                 
                 if not generation_config.return_dict_in_generate and _x_token_general_attention is not None:
-                    ipdb.set_trace()
                     last_layer_x_token_general_attention = _x_token_general_attention[generation_config.attn_layer_idx] # TODO 暂定最后一层的att
                     sliced_attn = last_layer_x_token_general_attention[0, :, -1, pos:pos+NUM_IMG_TOKENS]
                     reshape_attn = sliced_attn.mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)

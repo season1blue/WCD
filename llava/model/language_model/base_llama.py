@@ -227,6 +227,7 @@ class LlamaModel(LlamaPreTrainedModel):
         #     ipdb.set_trace()
         previous_attn_diff = None
         for layer_idx, decoder_layer in enumerate(self.layers):
+            ipdb.set_trace()
             
             if output_hidden_states:
                 all_hidden_states += (hidden_states,)

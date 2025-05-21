@@ -91,13 +91,11 @@ def _eval(args, epoch=None, model=None):
     
     generation_config = GenerationConfig.from_model_config(model.config)
     # generation_config.generation_mode = "dola_generation"  # 你可也用枚举或字符串标记
-    generation_config.dola_layers = "low"
     generation_config.attn_layer_idx = args.attn_layer_idx
+    generation_config.dola_layers = "low"
 
-    generation_config.output_attentions = True
-    generation_config.return_dict_in_generate = True
-
-    
+    # generation_config.output_attentions = True
+    # generation_config.return_dict_in_generate = True
 
     
     for dd in tqdm(dataloader, desc="Processing", ncols=100):
