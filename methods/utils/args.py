@@ -9,10 +9,13 @@ task_to_image_path = {
     "mvsa_m": "/ai/teacher/ssz/all_data/msa/MVSA_Multiple/data",
     "mvsa_s": "/ai/teacher/ssz/all_data/msa/MVSA_Single/data",
     "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/train_val",
-    "docvqa": "./data/docvqa/images",
+    "docvqa": "/ai/teacher/ssz/all_data/mqa/docvqa",
+    "okvqa": "/ai/teacher/dkc/Assets/OKVQA/val2014",
+    "vizwiz": "/ai/teacher/ssz/all_data/mqa/vizwiz/val",
+    "vqav2": "/ai/teacher/ssz/all_data/mqa/VQAv2/val2014",
+    # "vqav2": "/ai/teacher/ssz/all_data/mqa/VQAv2/train2014",
     "pope": "./data/pope/images",
     "vstar": "./data/vstar/images",
-    "vqav2": "./data/vqav2/images",
 }
 
 # eval
@@ -23,10 +26,12 @@ task_to_question_path = {
     "mvsa_m": "/ai/teacher/ssz/all_data/msa/MVSA_Multiple/test.json",
     "mvsa_s": "/ai/teacher/ssz/all_data/msa/MVSA_Single/new_test_mix.json",
     "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/processed/val_mix.json",
-    "docvqa": "./data/docvqa/data.json",
+    "docvqa": "/ai/teacher/ssz/all_data/mqa/docvqa/val_v1.0_withQT.json",
+    "vqav2": "/ai/teacher/ssz/all_data/mqa/VQAv2/processed/vqav2val.json",
+    "okvqa": "/ai/teacher/dkc/Assets/OKVQA/processed_datasets/okvqa_val.json",
+    "vizwiz": "/ai/teacher/ssz/all_data/mqa/vizwiz/processed/val.json",
     "pope": "./data/pope/data.json",
     "vstar": "./data/vstar/data.json",
-    "vqav2": "./data/vqav2/data.json",
 }
 
 # train
@@ -35,6 +40,10 @@ task_to_train_path = {
     "gqa": "/ai/teacher/ssz/all_data/mqa/GQA/jsons/balanced_trainset.json",
     # "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/processed/train_mix.json",
     "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/processed/train_example.json",
+    "docvqa": "/ai/teacher/ssz/all_data/mqa/docvqa/train_v1.0_withQT.json",
+    "vqav2": "/ai/teacher/ssz/all_data/mqa/VQAv2/processed/vqav2train.json",
+    "vizwiz": "/ai/teacher/ssz/all_data/mqa/vizwiz/processed/train.json",
+    "okvqa": "/ai/teacher/dkc/Assets/OKVQA/processed_datasets/okvqa_train.json"
 }
 
 model_to_fullname = {
@@ -63,6 +72,7 @@ def load_args():
     parser.add_argument("--is_eval", type=int, default=0)
     
     parser.add_argument("--attn_layer_idx", type=int, default=-1)
+    parser.add_argument("--target_layer_idx", type=int, default=-1)
     parser.add_argument("--result_path", type=str)
     
     

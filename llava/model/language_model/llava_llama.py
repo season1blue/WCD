@@ -72,7 +72,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         image_sizes: Optional[List[List[int]]] = None,
         return_dict: Optional[bool] = None,
         _general_attention=None,
-        image_start_pos=None,
+        generation_config=None
         
     ) -> Union[Tuple, CausalLMOutputWithPast]:
 
@@ -106,7 +106,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
             _general_attention=_general_attention,
-            image_start_pos=image_start_pos
+            generation_config=generation_config
         )
 
 

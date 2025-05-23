@@ -2523,6 +2523,7 @@ class MyGenerationMixin:
         
         NUM_IMG_TOKENS=576
         pos = _input_ids[0].tolist().index(-200)  # batchsize = 1的时候
+        generation_config.image_start_pos = pos
 
         gen_count = 0
         while self._has_unfinished_sequences(this_peer_finished, synced_gpus, device=input_ids.device):
@@ -2531,7 +2532,7 @@ class MyGenerationMixin:
             
             if gen_count < 1:
                 
-                if not generation_config.return_dict_in_generate and _x_token_general_attention is not None:
+                if not generation_config.return_dict_in_generate and _x_token_general_attention is not None and False:
                     last_layer_x_token_general_attention = _x_token_general_attention[generation_config.attn_layer_idx] # TODO 暂定最后一层的att
                     sliced_attn = last_layer_x_token_general_attention[0, :, -1, pos:pos+NUM_IMG_TOKENS]
                     reshape_attn = sliced_attn.mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
@@ -2550,15 +2551,16 @@ class MyGenerationMixin:
                     output_attentions=output_attentions,
                     output_hidden_states=True,
                     _general_attention=_x_token_general_attention,
-                    image_start_pos=pos,
+                    generation_config=generation_config
                 )
             else:
+                generation_config.image_start_pos = None
                 outputs = self(
                     **model_inputs,
                     return_dict=True,
                     output_attentions=output_attentions,
                     output_hidden_states=True,
-                    image_start_pos=None
+                    generation_config=generation_config
                 )   
 
             gen_count += 1

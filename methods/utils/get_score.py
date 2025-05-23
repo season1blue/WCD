@@ -74,6 +74,13 @@ def get_acc(pred, gts):
     same_num = 1 if any(p in flatten_gt for p in pred) else 0
     return 100*same_num
 
+def get_acc_okvqa(pred, gts):
+    pred = process_text(pred).split(" ")
+    gts = [process_text(gt).split(" ") for gt in gts]
+
+    same_num = sum([1 if pred == gt else 0 for gt in gts])
+    return 100*min(0.3*same_num, 1)
+
 def get_acc_mvsa(pred, gts):
     pred = process_text(pred)
     gts = process_text(gts)
@@ -110,8 +117,27 @@ def evaluate_textvqa(datas):
         raw_answer = data['gen_answer']
         # crop_answer = data['crop_answer']
         answers = data['answers']
-
+        
+        if set(answers) == {"unanswerable"}:
+            continue
         raw_acc = get_acc(raw_answer, answers)
+        crop_acc = 0
+
+        raw_accs.append(raw_acc)
+        crop_accs.append(crop_acc)
+
+    return sum(raw_accs) / len(raw_accs), sum(crop_accs) / len(crop_accs)
+
+def evaluate_okvqa(datas):
+    raw_accs = []
+    crop_accs = []
+    for data in tqdm(datas):
+        raw_answer = data['gen_answer']
+        answers = data['answers']
+        
+        if set(answers) == {"unanswerable"}:
+            continue
+        raw_acc = get_acc_okvqa(raw_answer, answers)
         crop_acc = 0
 
         raw_accs.append(raw_acc)

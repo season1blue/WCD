@@ -231,7 +231,7 @@ class LlamaModel(LlamaPreTrainedModel):
         return_dict: Optional[bool] = None,
         cache_position: Optional[torch.LongTensor] = None,
         _general_attention=None,
-        image_start_pos=None
+        generation_config=None
     ) -> Union[Tuple, BaseModelOutputWithPast]:
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_hidden_states = (
@@ -293,6 +293,8 @@ class LlamaModel(LlamaPreTrainedModel):
         # if _general_attention is not None:
         #     ipdb.set_trace()
         max_jsd_diff = None
+        target_layer_idx = 31
+        
         for layer_idx, decoder_layer in enumerate(self.layers):
             
             if output_hidden_states:
@@ -304,8 +306,8 @@ class LlamaModel(LlamaPreTrainedModel):
             #     ipdb.set_trace()
 
             # 在生成第一个词的第31层
-            if output_attentions and image_start_pos is not None and layer_idx == 31:
-                masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), max_jsd_diff, image_start_pos=image_start_pos, mask_ratio=0.5, mask_scale=0)
+            if output_attentions and generation_config.image_start_pos is not None and max_jsd_diff is not None:
+                masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), max_jsd_diff, image_start_pos=generation_config.image_start_pos, mask_ratio=0.1, mask_scale=1e-9)
                 hidden_states = masked_hidden_states
 
             # print(layer_idx, hidden_states.size())
@@ -345,12 +347,12 @@ class LlamaModel(LlamaPreTrainedModel):
             
             NUM_IMG_TOKENS=576
 
-            if output_attentions and image_start_pos is not None:
-                pos = image_start_pos
+            if output_attentions and generation_config.image_start_pos is not None:
+                pos = generation_config.image_start_pos
                 true_vis_attn_weight = layer_outputs[1][0, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
                 all_attn_weights += (true_vis_attn_weight, )
                 
-                if layer_idx == 30:
+                if len(all_attn_weights) > 2:
                     max_jsd_idx, max_jsd_diff = find_max_jsd_and_diff(all_attn_weights)                
             
 
@@ -498,7 +500,7 @@ class LlamaForCausalLM(MyGenerationMixin, LlamaPreTrainedModel):
         cache_position: Optional[torch.LongTensor] = None,
         num_logits_to_keep: int = 0,
         _general_attention = None,
-        image_start_pos=None,
+        generation_config=None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
         r"""
         Args:
@@ -551,7 +553,7 @@ class LlamaForCausalLM(MyGenerationMixin, LlamaPreTrainedModel):
             return_dict=return_dict,
             cache_position=cache_position,
             _general_attention=_general_attention,
-            image_start_pos=image_start_pos
+            generation_config=generation_config
         )
         
         

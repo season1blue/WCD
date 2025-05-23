@@ -328,3 +328,105 @@
     "time": "2025-05-21d 21:01:55",
     "acc": 59.1
 }
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 21:41:09",
+    "acc": 59.08
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 22:19:20",
+    "acc": 47.94
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 23:41:37",
+    "acc": 59.06
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-21d 23:58:40",
+    "acc": 58.18
+}
+{
+    "version": "2",
+    "epoch": null,
+    "time": "2025-05-22d 10:04:16",
+    "acc": 58.3
+}
+{
+    "version": "3",
+    "epoch": null,
+    "time": "2025-05-22d 10:19:01",
+    "acc": 58.56
+}
+{
+    "version": "2",
+    "epoch": null,
+    "time": "2025-05-22d 10:38:53",
+    "acc": 57.62
+}
+{
+    "version": "2",
+    "epoch": null,
+    "time": "2025-05-22d 11:09:23",
+    "acc": 58.0
+}
+{
+    "version": "2",
+    "epoch": null,
+    "time": "2025-05-22d 11:25:53",
+    "acc": 58.82
+}
+{
+    "version": "17",
+    "epoch": null,
+    "time": "2025-05-22d 17:48:50",
+    "acc": 55.9
+}
+{
+    "version": "17",
+    "epoch": null,
+    "time": "2025-05-22d 19:38:24",
+    "acc": 26.93961488128622
+}
+{
+    "version": "17",
+    "epoch": null,
+    "time": "2025-05-22d 19:59:34",
+    "acc": 62.5
+}
+{
+    "version": "17",
+    "epoch": null,
+    "time": "2025-05-22d 20:04:21",
+    "acc": 63.85
+}
+{
+    "version": "okvqa-2",
+    "epoch": null,
+    "time": "2025-05-23d 00:16:29",
+    "acc": 52.89734443123266
+}
+{
+    "version": "okvqa-2",
+    "epoch": null,
+    "time": "2025-05-23d 09:09:14",
+    "acc": 56.06420927467301
+}
+{
+    "version": "vizwiz-2",
+    "epoch": null,
+    "time": "2025-05-23d 09:53:25",
+    "acc": 58.423978728547254
+}
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-23d 10:29:37",
+    "acc": 46.5
+}

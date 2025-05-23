@@ -44,7 +44,12 @@ def clean_text(text: str) -> str:
 class ImageTextDataset(Dataset):
     def __init__(self, task, question_path, image_path, max_samples=500):
         self.task = task
-        self.data = self.load_data(question_path)
+        
+        with open(question_path, "r") as f:
+            self.data = json.load(f)
+
+        if self.task == "docvqa":
+            self.data = self.data["data"]
             
         if max_samples != -1:
             self.data = self.data[:max_samples]  # 截断前N条
@@ -59,14 +64,10 @@ class ImageTextDataset(Dataset):
                 d["image_path"] = os.path.join(image_path, f"{d['imageId']}.jpg")
             elif "image_id" in d:
                 d["image_path"] = os.path.join(image_path, f"{d['image_id']}.jpg")
-            
-    def load_data(self, path):
-        if os.path.exists(path):
-            with open(path, "r") as f:
-                return json.load(f)
-        else:
-            return list(load_dataset(path)['test'])
-
+            elif "image" in d:
+                d["image_path"] = os.path.join(image_path, d["image"])
+                
+                
     def __len__(self):
         return len(self.data)
 
@@ -83,13 +84,26 @@ class ImageTextDataset(Dataset):
                 "answer": item["answer"],  # 防止部分缺失
                 # "qid": item.get("qid", idx)
             }
-        elif self.task == "textvqa":
+        elif self.task in ["okvqa"]:
+            image_id = os.path.splitext(os.path.basename(item["image_path"]))[0]
+            coco_name = f"COCO_val2014_{int(image_id):012d}.jpg"
+            dir_path = os.path.dirname(item["image_path"])
+            image_path = os.path.join(dir_path, coco_name)
+
             return {
-                "image_path": item["image_path"],
+                "image_path": image_path,
                 "text": item["question"],
-                "answers": tuple(item["answers"]),  # 防止部分缺失
+                "answers": item["answers"],   
                 # "qid": item.get("qid", idx)
             }
+        elif self.task in ["textvqa", "docvqa", "vizwiz"]:
+            dic = {
+                "image_path": item["image_path"],
+                "text": item["question"],
+                "answers": item["answers"],  # 防止部分缺失
+                # "qid": item.get("qid", idx)
+            }
+            return dic
         elif self.task in ["mvsa_m", "mvsa_s"]:
             text = clean_text(item["text"])
             
@@ -100,8 +114,23 @@ class ImageTextDataset(Dataset):
                 "text": text,
                 # "answer": item["sentiment"],  # 防止部分缺失
                 "new_answer": item["new_sentiment"],  # 防止部分缺失
+            }
+        elif self.task in ["vqav2"]:
+            image_id = os.path.splitext(os.path.basename(item["image_path"]))[0]
+            # 构造新文件名
+            coco_name = f"COCO_val2014_{int(image_id):012d}.jpg"
+            # 拼接目录
+            dir_path = os.path.dirname(item["image_path"])
+            image_path = os.path.join(dir_path, coco_name)
+
+            return {
+                "image_path": image_path,
+                "text": item["question"],
+                "answers": item["answers"],   
                 # "qid": item.get("qid", idx)
             }
+       
+            
             
 
 

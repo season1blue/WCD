@@ -24,11 +24,7 @@ def custom_collate_fn(batch):
     batch_out = {}
     for key in batch[0]:
         values = [d[key] for d in batch]
-        # 保持 answers 原始结构
-        if key == "answers":
-            batch_out[key] = values  # List[Tuple[str, ...]]
-        else:
-            batch_out[key] = values  # 或进一步处理其他字段
+        batch_out[key] = values  # 或进一步处理其他字段
     return batch_out
 
 
@@ -84,6 +80,7 @@ def _eval(args, epoch=None, model=None):
             dataset,
             batch_size=1,
             shuffle=False,
+            collate_fn=custom_collate_fn
             # num_workers=1
         )
 
@@ -92,6 +89,7 @@ def _eval(args, epoch=None, model=None):
     generation_config = GenerationConfig.from_model_config(model.config)
     # generation_config.generation_mode = "dola_generation"  # 你可也用枚举或字符串标记
     generation_config.attn_layer_idx = args.attn_layer_idx
+    generation_config.target_layer_idx = args.target_layer_idx
     generation_config.dola_layers = "low"
 
     generation_config.output_attentions = True
@@ -221,11 +219,12 @@ def _eval(args, epoch=None, model=None):
 
     if args.task in ["mvsa_m", "mvsa_s"]:
         acc, _ = evaluate_mvsa(new_datas)
-    elif args.task == "gqa":
+    elif args.task in ["gqa"]:
         acc, _ = evaluate_gqa(new_datas)
-    elif args.task == "textvqa":
+    elif args.task in ["textvqa", "docvqa", "vqav2", "vizwiz"]:
         acc, _ = evaluate_textvqa(new_datas)
-
+    elif args.task in ["okvqa"]:
+        acc, _ = evaluate_okvqa(new_datas)
         
     result = {
         'version': args.lora_name,
