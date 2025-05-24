@@ -130,3 +130,141 @@
     "time": "2025-05-23d 11:21:39",
     "acc": 58.4
 }
+{
+    "version": "textvqa",
+    "epoch": null,
+    "time": "2025-05-23d 13:42:44",
+    "acc": 2.7
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-23d 15:02:43",
+    "acc": 70.114
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-23d 15:13:29",
+    "acc": 76.89
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-23d 15:16:15",
+    "acc": 77.0
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-23d 15:19:12",
+    "acc": 76.92
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-23d 15:24:45",
+    "acc": 76.13
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-23d 18:38:53",
+    "acc": 76.49
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-23d 18:44:16",
+    "acc": 75.96
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 00:28:08",
+    "acc": 0.0
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 00:30:27",
+    "acc": 77.57
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 00:32:45",
+    "acc": 77.1
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 00:35:04",
+    "acc": 76.26
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 00:37:22",
+    "acc": 76.09
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 00:39:42",
+    "acc": 75.82
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 07:02:44",
+    "acc": 0.0
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 07:05:52",
+    "acc": 0.46
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 08:22:49",
+    "acc": 0.0
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 08:26:53",
+    "acc": 32.23
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 08:30:31",
+    "acc": 3.5
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 08:35:38",
+    "acc": 18.59
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 09:30:44",
+    "acc": 0.13
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 09:33:43",
+    "acc": 30.51
+}
+{
+    "version": "vqav2",
+    "epoch": null,
+    "time": "2025-05-24d 09:36:45",
+    "acc": 35.62
+}

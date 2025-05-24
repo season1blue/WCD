@@ -57,7 +57,7 @@ def load_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", type=str, default="llava", choices=model_to_fullname.keys())
     parser.add_argument("--task", type=str, default="textvqa", choices=task_to_question_path.keys())
-    parser.add_argument("--method", type=str, default="new", choices=["rel_att", "pure_grad", "grad_att", "grad", "rel_att_high", "pure_grad_high", "grad_att_high", "grad_high"])
+    parser.add_argument("--method", type=str, default="rel_att")
     parser.add_argument("--save_path", type=str, default="./results")
     parser.add_argument("--total_chunks", type=int, default=1)
     parser.add_argument("--max_sample", type=int, default=500)  # -1代表所有数据全跑

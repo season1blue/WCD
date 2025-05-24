@@ -293,25 +293,20 @@ class LlamaModel(LlamaPreTrainedModel):
         # if _general_attention is not None:
         #     ipdb.set_trace()
         max_jsd_diff = None
-        target_layer_idx = 31
+        target_layer_idx = generation_config.target_layer_idx
         
         for layer_idx, decoder_layer in enumerate(self.layers):
             
             if output_hidden_states:
                 all_hidden_states += (hidden_states,)
 
-
-            # previous_attn_diff输入给decode_layer
-            # if _general_attention is not None:
-            #     ipdb.set_trace()
-
             # 在生成第一个词的第31层
-            if output_attentions and generation_config.image_start_pos is not None and max_jsd_diff is not None:
-                masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), max_jsd_diff, image_start_pos=generation_config.image_start_pos, mask_ratio=0.1, mask_scale=1e-9)
+            if output_attentions and generation_config.image_start_pos is not None and layer_idx == target_layer_idx and generation_config.attn_mask:
+                masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), max_jsd_diff, image_start_pos=generation_config.image_start_pos, mask_ratio=1, mask_scale=1e-9)
                 hidden_states = masked_hidden_states
 
             # print(layer_idx, hidden_states.size())
-
+            
             if self.gradient_checkpointing and self.training:
                 layer_outputs = self._gradient_checkpointing_func(
                     decoder_layer.__call__,
@@ -347,12 +342,12 @@ class LlamaModel(LlamaPreTrainedModel):
             
             NUM_IMG_TOKENS=576
 
-            if output_attentions and generation_config.image_start_pos is not None:
+            if output_attentions and generation_config.image_start_pos is not None and generation_config.attn_mask:
                 pos = generation_config.image_start_pos
                 true_vis_attn_weight = layer_outputs[1][0, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
                 all_attn_weights += (true_vis_attn_weight, )
                 
-                if len(all_attn_weights) > 2:
+                if layer_idx == target_layer_idx-1:
                     max_jsd_idx, max_jsd_diff = find_max_jsd_and_diff(all_attn_weights)                
             
 

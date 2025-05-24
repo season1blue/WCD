@@ -93,8 +93,10 @@ def _eval(args, epoch=None, model=None):
     generation_config.dola_layers = "low"
 
     generation_config.output_attentions = True
-    generation_config.return_dict_in_generate = True
+    # generation_config.return_dict_in_generate = False
 
+    generation_config.attn_mask = True
+    generation_config.attn_diff = True
     
     for dd in tqdm(dataloader, desc="Processing", ncols=100):
         questions = dd["text"]  # batch_size个问题
@@ -221,9 +223,9 @@ def _eval(args, epoch=None, model=None):
         acc, _ = evaluate_mvsa(new_datas)
     elif args.task in ["gqa"]:
         acc, _ = evaluate_gqa(new_datas)
-    elif args.task in ["textvqa", "docvqa", "vqav2", "vizwiz"]:
+    elif args.task in ["textvqa", "docvqa", "vizwiz"]:
         acc, _ = evaluate_textvqa(new_datas)
-    elif args.task in ["okvqa"]:
+    elif args.task in ["vqav2", "okvqa"]:
         acc, _ = evaluate_okvqa(new_datas)
         
     result = {

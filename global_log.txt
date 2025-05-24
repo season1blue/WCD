@@ -1,0 +1,2 @@
+nohup: ignoring input
+Selected GPU 1

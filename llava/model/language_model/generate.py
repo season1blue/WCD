@@ -2578,7 +2578,7 @@ class MyGenerationMixin:
             if synced_gpus and this_peer_finished:
                 continue  # don't waste resources running the code we don't need
 
-            if generation_config.output_attentions and False:
+            if generation_config.output_attentions and generation_config.attn_diff:
                 # NEW ADD
                 final_attn = outputs.attentions[-1][0, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).to(final_logits.device).detach().cpu().clone()
 

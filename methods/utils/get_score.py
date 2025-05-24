@@ -292,8 +292,8 @@ def main(args):
     # json_files = sorted(json_files)
     # ckpt_path = args.ckpt_path 
     # json_name = ckpt_path.split('/')[-1]  # mvsa_s-pure-0417
-    json_file = os.path.join(args.save_path, "jsons", args.lora_name + '.json')
-    task = args.lora_name.split('-')[0]  # mvsa_s
+    json_file = os.path.join(args.save_path, "jsons", "vqav2.json")
+    task = "vqav2"  # mvsa_s
 
     with open(json_file, 'r') as f:
         datas = json.load(f) 
@@ -307,7 +307,7 @@ def main(args):
     elif task == 'aokvqa':
         raw_acc, crop_acc = evaluate_aokvqa(datas)
     elif task == 'vqav2':
-        raw_acc, crop_acc = evaluate_vqav2(datas)
+        raw_acc, crop_acc = evaluate_okvqa(datas)
     elif task == "gqa":
         raw_acc, crop_acc = evaluate_gqa(datas)
     elif task in ["mvsa_m", "mvsa_s"]:
@@ -365,7 +365,7 @@ def main(args):
 #     args.models = ['llava', 'blip', 'qwen2_5']
 #     args.methods = ['nocrop', 'rel_att', 'grad_att', 'grad', 'rel_att_high', 'grad_att_high', 'grad_high']
 #     # args.tasks = ['textvqa', 'vstar', 'pope', 'aokvqa', 'docvqa', 'chartqa', 'infoqa', 'mvsa_m', 'mvsa_s', 'gqa']
-#     args.tasks = ['mvsa_s']
+#     args.tasks = ['vqav2']
     
 
 #     main(args)
