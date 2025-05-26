@@ -1,2 +1,2 @@
 nohup: ignoring input
-Selected GPU 1
+Selected GPU 3

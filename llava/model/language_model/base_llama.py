@@ -20,7 +20,7 @@ from transformers.modeling_outputs import (
     BaseModelOutputWithPast,
     CausalLMOutputWithPast,
 )
-from transformers.models.llama.modeling_llama import LlamaRotaryEmbedding, LLAMA_INPUTS_DOCSTRING
+from transformers.models.llama.modeling_llama import LlamaRotaryEmbedding
 
 from transformers.modeling_attn_mask_utils import AttentionMaskConverter
 from transformers.generation import GenerationMixin
@@ -150,41 +150,38 @@ def find_max_jsd_and_diff(all_attn_weights):
     return max_idx, max_diff
 
 
-def apply_soft_mask_to_image_embeds(inputs_embeds, attn, image_start_pos, mask_ratio=0.3, mask_scale=0.0):
+def apply_soft_mask_to_image_embeds(inputs_embeds, attn=None, image_start_pos=0, mask_ratio=0.3, mask_scale=0.0):
     """
-    inputs_embeds: (1, seq_len, dim)  e.g., (1, 637, 4096)
-    attn: (24, 24)  - image patch attention
-    image_start_pos: int - where the image embeddings start
-    mask_ratio: float - e.g., 0.3 means mask lowest 30% attention patches
-    mask_scale: float - scaling factor for masked tokens (soft mask, 0.0 ~ 1.0)
+    Apply soft masking to image embeddings in inputs_embeds.
+
+    inputs_embeds: (1, seq_len, dim)
+    attn: Optional (24, 24) attention scores. If None, apply mask to all image patches.
+    image_start_pos: Index where image tokens start.
+    mask_ratio: Only used if attn is provided; fraction of low-attn patches to mask.
+    mask_scale: Scaling factor for masked tokens (soft mask: 0.0 = full mask, 1.0 = no mask).
     """
-    if isinstance(attn, np.ndarray):
-        attn = torch.tensor(attn, dtype=torch.float32, device=inputs_embeds.device)
-    elif isinstance(attn, torch.Tensor) and attn.device != inputs_embeds.device:
-        attn = attn.to(inputs_embeds.device)
+    if attn is not None:
+        if isinstance(attn, np.ndarray):
+            attn = torch.tensor(attn, dtype=torch.float32, device=inputs_embeds.device)
+        elif isinstance(attn, torch.Tensor) and attn.device != inputs_embeds.device:
+            attn = attn.to(inputs_embeds.device)
 
-    # Flatten attention to 576
-    attn_flat = attn.flatten()  # (576,)
-
-    # Calculate threshold
-    num_mask = int(mask_ratio * len(attn_flat))
-    threshold = torch.topk(attn_flat, k=num_mask, largest=False).values[-1]
-
-    # Generate mask: 1 for keep, 0 for mask
-    keep_mask = (attn_flat > threshold).float()  # (576,)
-    # Optional: Use soft mask instead of binary
-    soft_mask = keep_mask + (1 - keep_mask) * mask_scale  # (576,)  1.0 for keep, scale for mask
+        attn_flat = attn.flatten()  # (576,)
+        num_mask = int(mask_ratio * len(attn_flat))
+        threshold = torch.topk(attn_flat, k=num_mask, largest=False).values[-1]
+        keep_mask = (attn_flat > threshold).float()
+        soft_mask = keep_mask + (1 - keep_mask) * mask_scale
+    else:
+        # No attention provided: mask all image tokens with uniform soft mask
+        soft_mask = torch.full((576,), fill_value=mask_scale, device=inputs_embeds.device)
 
     # Extract image embeds
-    image_embeds = inputs_embeds[0, image_start_pos:image_start_pos+576, :]  # (576, 4096)
-
-    # Apply soft mask
-    image_embeds_masked = image_embeds * soft_mask.unsqueeze(-1)  # (576, 4096)
-
-    # Replace back
-    inputs_embeds[0, image_start_pos:image_start_pos+576, :] = image_embeds_masked
+    image_embeds = inputs_embeds[0, image_start_pos:image_start_pos + 576, :]  # (576, dim)
+    image_embeds_masked = image_embeds * soft_mask.unsqueeze(-1)  # (576, dim)
+    inputs_embeds[0, image_start_pos:image_start_pos + 576, :] = image_embeds_masked
 
     return inputs_embeds
+
 
 
 class LlamaModel(LlamaPreTrainedModel):
@@ -217,7 +214,7 @@ class LlamaModel(LlamaPreTrainedModel):
     def set_input_embeddings(self, value):
         self.embed_tokens = value
 
-    @add_start_docstrings_to_model_forward(LLAMA_INPUTS_DOCSTRING)
+    @add_start_docstrings_to_model_forward()
     def forward(
         self,
         input_ids: torch.LongTensor = None,
@@ -301,8 +298,13 @@ class LlamaModel(LlamaPreTrainedModel):
                 all_hidden_states += (hidden_states,)
 
             # 在生成第一个词的第31层
+            # if output_attentions and generation_config.image_start_pos is not None and layer_idx == target_layer_idx and generation_config.attn_mask:
+            #     masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), max_jsd_diff, image_start_pos=generation_config.image_start_pos, mask_ratio=1, mask_scale=1e-9)
+            #     hidden_states = masked_hidden_states
+            
+            # 全部遮蔽
             if output_attentions and generation_config.image_start_pos is not None and layer_idx == target_layer_idx and generation_config.attn_mask:
-                masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), max_jsd_diff, image_start_pos=generation_config.image_start_pos, mask_ratio=1, mask_scale=1e-9)
+                masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), None, image_start_pos=generation_config.image_start_pos, mask_ratio=1, mask_scale=1e-9)
                 hidden_states = masked_hidden_states
 
             # print(layer_idx, hidden_states.size())
@@ -342,13 +344,13 @@ class LlamaModel(LlamaPreTrainedModel):
             
             NUM_IMG_TOKENS=576
 
-            if output_attentions and generation_config.image_start_pos is not None and generation_config.attn_mask:
-                pos = generation_config.image_start_pos
-                true_vis_attn_weight = layer_outputs[1][0, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
-                all_attn_weights += (true_vis_attn_weight, )
+            # if output_attentions and generation_config.image_start_pos is not None and generation_config.attn_mask:
+            #     pos = generation_config.image_start_pos
+            #     true_vis_attn_weight = layer_outputs[1][0, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
+            #     all_attn_weights += (true_vis_attn_weight, )
                 
-                if layer_idx == target_layer_idx-1:
-                    max_jsd_idx, max_jsd_diff = find_max_jsd_and_diff(all_attn_weights)                
+            #     if layer_idx == target_layer_idx-1:
+            #         max_jsd_idx, max_jsd_diff = find_max_jsd_and_diff(all_attn_weights)                
             
 
 
@@ -478,7 +480,7 @@ class LlamaForCausalLM(MyGenerationMixin, LlamaPreTrainedModel):
     def get_decoder(self):
         return self.model
 
-    @add_start_docstrings_to_model_forward(LLAMA_INPUTS_DOCSTRING)
+    @add_start_docstrings_to_model_forward()
     @replace_return_docstrings(output_type=CausalLMOutputWithPast, config_class=_CONFIG_FOR_DOC)
     def forward(
         self,

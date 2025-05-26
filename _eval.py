@@ -18,7 +18,7 @@ from torch.utils.data import Dataset, DataLoader
 from methods.utils.get_score import *
 import ipdb
 from datetime import datetime
-
+import time
 
 def custom_collate_fn(batch):
     batch_out = {}
@@ -97,6 +97,8 @@ def _eval(args, epoch=None, model=None):
 
     generation_config.attn_mask = True
     generation_config.attn_diff = True
+    
+    begin_time = time.time()
     
     for dd in tqdm(dataloader, desc="Processing", ncols=100):
         questions = dd["text"]  # batch_size个问题
@@ -231,6 +233,7 @@ def _eval(args, epoch=None, model=None):
     result = {
         'version': args.lora_name,
         'epoch': epoch,
+        'run_time': time.time()-begin_time,
         'time': datetime.now().strftime("%Y-%m-%dd %H:%M:%S"),
         'acc': acc,
     }
