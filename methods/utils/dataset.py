@@ -396,7 +396,9 @@ class TrainDataset(Dataset):
             source["answer"] = item.get("answer", "")
             task_description = ""
 
+
         data_dict = preprocess_v2(source, self.tokenizer, has_image=('image_path' in source))
+        ipdb.set_trace()
         data_dict['image'] = image
         # data_dict: input_ids, labels, image
 

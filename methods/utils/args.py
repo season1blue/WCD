@@ -50,7 +50,8 @@ model_to_fullname = {
     "llava": "llava-hf/llava-1.5-7b-hf",
     "blip": "Salesforce/instructblip-vicuna-7b",
     "qwen2_5": "Qwen/Qwen2.5-VL-3B-Instruct",
-    "llava_new": "liuhaotian/llava-v1.5-7b"
+    "llava_new": "liuhaotian/llava-v1.5-7b",
+    "llava_new_13": "liuhaotian/llava-v1.5-13b"
 }
 
 def load_args():
@@ -74,6 +75,7 @@ def load_args():
     parser.add_argument("--attn_layer_idx", type=int, default=-1)
     parser.add_argument("--target_layer_idx", type=int, default=-1)
     parser.add_argument("--result_path", type=str)
+    parser.add_argument("--mask_ratio", type=float, default=0.1)
     
     
     

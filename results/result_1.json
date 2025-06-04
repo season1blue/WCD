@@ -814,3 +814,283 @@
     "time": "2025-05-26d 10:22:57",
     "acc": 0.0
 }
+{
+    "version": "vqav2-29-0.2ratio",
+    "epoch": null,
+    "run_time": 2277.7996928691864,
+    "time": "2025-05-26d 11:58:09",
+    "acc": 67.52
+}
+{
+    "version": "textvqa-0",
+    "epoch": null,
+    "run_time": 1379.9051628112793,
+    "time": "2025-05-26d 16:36:57",
+    "acc": 11.1
+}
+{
+    "version": "textvqa-1",
+    "epoch": null,
+    "run_time": 102.90452194213867,
+    "time": "2025-05-26d 16:38:51",
+    "acc": 0.8
+}
+{
+    "version": "vqav2-31",
+    "epoch": null,
+    "run_time": 126.67610573768616,
+    "time": "2025-05-26d 16:55:33",
+    "acc": 76.7
+}
+{
+    "version": "okvqa-0",
+    "epoch": null,
+    "run_time": 1006.68829870224,
+    "time": "2025-05-26d 16:55:51",
+    "acc": 1.64
+}
+{
+    "version": "okvqa-1",
+    "epoch": null,
+    "run_time": 97.75047588348389,
+    "time": "2025-05-26d 16:57:40",
+    "acc": 0.0
+}
+{
+    "version": "vizwiz-0",
+    "epoch": null,
+    "run_time": 1152.339684009552,
+    "time": "2025-05-26d 17:17:04",
+    "acc": 19.1512513601741
+}
+{
+    "version": "vizwiz-1",
+    "epoch": null,
+    "run_time": 122.82210898399353,
+    "time": "2025-05-26d 17:19:19",
+    "acc": 0.1088139281828074
+}
+{
+    "version": "gqa-0",
+    "epoch": null,
+    "run_time": 314.2759027481079,
+    "time": "2025-05-26d 17:24:45",
+    "acc": 20.7
+}
+{
+    "version": "gqa-1",
+    "epoch": null,
+    "run_time": 96.40984416007996,
+    "time": "2025-05-26d 17:26:36",
+    "acc": 0.0
+}
+{
+    "version": "vqav2-29-0.1ratio-2mpl",
+    "epoch": null,
+    "run_time": 125.47230362892151,
+    "time": "2025-05-26d 21:12:20",
+    "acc": 76.87
+}
+{
+    "version": "vqav2-29",
+    "epoch": null,
+    "run_time": 122.75269150733948,
+    "time": "2025-05-26d 22:28:54",
+    "acc": 77.29
+}
+{
+    "version": "vqav2-29-0.1ratio-dynamic",
+    "epoch": null,
+    "run_time": 2409.1885781288147,
+    "time": "2025-05-26d 23:39:14",
+    "acc": 67.74
+}
+{
+    "version": "vqav2-29-0.1-2mpl",
+    "epoch": null,
+    "run_time": 125.90743923187256,
+    "time": "2025-05-27d 15:47:34",
+    "acc": 76.65
+}
+{
+    "version": "vqav2-29-0.2-2mpl",
+    "epoch": null,
+    "run_time": 123.22772789001465,
+    "time": "2025-05-27d 15:49:50",
+    "acc": 77.59
+}
+{
+    "version": "vqav2-29-0.3-2mpl",
+    "epoch": null,
+    "run_time": 123.61537289619446,
+    "time": "2025-05-27d 15:52:07",
+    "acc": 76.93
+}
+{
+    "version": "vqav2-29-0.4-2mpl",
+    "epoch": null,
+    "run_time": 201.27586698532104,
+    "time": "2025-05-27d 15:55:40",
+    "acc": 75.93
+}
+{
+    "version": "vqav2-29-0.5-2mpl",
+    "epoch": null,
+    "run_time": 1419.921534538269,
+    "time": "2025-05-27d 16:19:32",
+    "acc": 72.38
+}
+{
+    "version": "vqav2-29-0.6-2mpl",
+    "epoch": null,
+    "run_time": 3163.8197417259216,
+    "time": "2025-05-27d 17:12:27",
+    "acc": 62.07
+}
+{
+    "version": "gqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 147.5051555633545,
+    "time": "2025-05-27d 17:19:14",
+    "acc": 69.1
+}
+{
+    "version": "gqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 134.56607508659363,
+    "time": "2025-05-27d 17:21:40",
+    "acc": 69.4
+}
+{
+    "version": "gqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 131.26966261863708,
+    "time": "2025-05-27d 17:24:03",
+    "acc": 68.5
+}
+{
+    "version": "gqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 238.905446767807,
+    "time": "2025-05-27d 17:28:19",
+    "acc": 67.9
+}
+{
+    "version": "gqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 1251.0795257091522,
+    "time": "2025-05-27d 17:49:23",
+    "acc": 63.3
+}
+{
+    "version": "gqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 4340.9072024822235,
+    "time": "2025-05-27d 19:01:56",
+    "acc": 49.8
+}
+{
+    "version": "vqav2-29-0.7-2mpl",
+    "epoch": null,
+    "run_time": 7350.590197563171,
+    "time": "2025-05-27d 19:15:10",
+    "acc": 43.55
+}
+{
+    "version": "okvqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 193.71579575538635,
+    "time": "2025-05-27d 19:49:14",
+    "acc": 51.66
+}
+{
+    "version": "okvqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 147.32393717765808,
+    "time": "2025-05-27d 19:51:53",
+    "acc": 50.78
+}
+{
+    "version": "okvqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 143.6804814338684,
+    "time": "2025-05-27d 19:54:28",
+    "acc": 50.52
+}
+{
+    "version": "okvqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 250.10517859458923,
+    "time": "2025-05-27d 19:58:50",
+    "acc": 47.92
+}
+{
+    "version": "okvqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 1919.9493935108185,
+    "time": "2025-05-27d 20:31:01",
+    "acc": 42.26
+}
+{
+    "version": "gqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 8124.664373159409,
+    "time": "2025-05-27d 21:17:33",
+    "acc": 35.1
+}
+{
+    "version": "okvqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 4562.025413751602,
+    "time": "2025-05-27d 21:47:14",
+    "acc": 33.3
+}
+{
+    "version": "gqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 11678.607661008835,
+    "time": "2025-05-28d 00:32:24",
+    "acc": 22.2
+}
+{
+    "version": "okvqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 9967.989070653915,
+    "time": "2025-05-28d 00:33:33",
+    "acc": 24.42
+}
+{
+    "version": "okvqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 11013.709574460983,
+    "time": "2025-05-28d 03:37:19",
+    "acc": 19.38
+}
+{
+    "version": "gqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 13730.17121553421,
+    "time": "2025-05-28d 04:21:27",
+    "acc": 16.5
+}
+{
+    "version": "okvqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 12228.100974082947,
+    "time": "2025-05-28d 07:01:18",
+    "acc": 18.54
+}
+{
+    "version": "gqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 20546.036151647568,
+    "time": "2025-05-28d 10:04:04",
+    "acc": 0.0
+}
+{
+    "version": "okvqa-29-2mpl-ratio",
+    "epoch": null,
+    "run_time": 22452.489050149918,
+    "time": "2025-05-28d 13:15:41",
+    "acc": 0.0
+}

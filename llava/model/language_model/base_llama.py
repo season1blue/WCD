@@ -126,9 +126,16 @@ def save_heatmap_with_array(array, batch_idx, layer_id, cmap='viridis', output_d
     return image_path, array_path
 
 
-def find_max_jsd_and_diff(all_attn_weights):
+def find_max_jsd_and_diff(all_attn_weights, compare_idx=None):
     reference = all_attn_weights[-1].flatten()
     reference = reference / reference.sum()  # 归一化
+
+    if compare_idx is not None:
+        candidate = all_attn_weights[compare_idx].flatten()
+        candidate = candidate / candidate.sum()
+        diff = all_attn_weights[-1] - all_attn_weights[compare_idx]
+        diff[diff < 0] = 1e-9
+        return compare_idx, diff
 
     max_jsd = -1
     max_idx = -1
@@ -160,17 +167,22 @@ def apply_soft_mask_to_image_embeds(inputs_embeds, attn=None, image_start_pos=0,
     mask_ratio: Only used if attn is provided; fraction of low-attn patches to mask.
     mask_scale: Scaling factor for masked tokens (soft mask: 0.0 = full mask, 1.0 = no mask).
     """
+    
     if attn is not None:
         if isinstance(attn, np.ndarray):
             attn = torch.tensor(attn, dtype=torch.float32, device=inputs_embeds.device)
         elif isinstance(attn, torch.Tensor) and attn.device != inputs_embeds.device:
             attn = attn.to(inputs_embeds.device)
 
-        attn_flat = attn.flatten()  # (576,)
+        attn_flat = attn.flatten()
         num_mask = int(mask_ratio * len(attn_flat))
-        threshold = torch.topk(attn_flat, k=num_mask, largest=False).values[-1]
-        keep_mask = (attn_flat > threshold).float()
-        soft_mask = keep_mask + (1 - keep_mask) * mask_scale
+
+        if num_mask == 0:
+            soft_mask = torch.ones_like(attn_flat)
+        else:
+            threshold = torch.topk(attn_flat, k=num_mask, largest=False).values[-1]
+            keep_mask = (attn_flat > threshold).float()
+            soft_mask = keep_mask + (1 - keep_mask) * mask_scale
     else:
         # No attention provided: mask all image tokens with uniform soft mask
         soft_mask = torch.full((576,), fill_value=mask_scale, device=inputs_embeds.device)
@@ -290,6 +302,8 @@ class LlamaModel(LlamaPreTrainedModel):
         # if _general_attention is not None:
         #     ipdb.set_trace()
         max_jsd_diff = None
+        max_jsd_idx = 0
+        
         target_layer_idx = generation_config.target_layer_idx
         
         for layer_idx, decoder_layer in enumerate(self.layers):
@@ -298,14 +312,16 @@ class LlamaModel(LlamaPreTrainedModel):
                 all_hidden_states += (hidden_states,)
 
             # 在生成第一个词的第31层
-            # if output_attentions and generation_config.image_start_pos is not None and layer_idx == target_layer_idx and generation_config.attn_mask:
-            #     masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), max_jsd_diff, image_start_pos=generation_config.image_start_pos, mask_ratio=1, mask_scale=1e-9)
-            #     hidden_states = masked_hidden_states
-            
-            # 全部遮蔽
             if output_attentions and generation_config.image_start_pos is not None and layer_idx == target_layer_idx and generation_config.attn_mask:
-                masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), None, image_start_pos=generation_config.image_start_pos, mask_ratio=1, mask_scale=1e-9)
+                print("jsd=",max_jsd_idx)
+                masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), max_jsd_diff, image_start_pos=generation_config.image_start_pos, mask_ratio=generation_config.mask_ratio, mask_scale=1e-9)
+                
                 hidden_states = masked_hidden_states
+            
+            # # 全部遮蔽
+            # if output_attentions and generation_config.image_start_pos is not None and layer_idx == target_layer_idx and generation_config.attn_mask:
+            #     masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), None, image_start_pos=generation_config.image_start_pos, mask_ratio=1, mask_scale=1e-9)
+            #     hidden_states = masked_hidden_states
 
             # print(layer_idx, hidden_states.size())
             
@@ -344,15 +360,13 @@ class LlamaModel(LlamaPreTrainedModel):
             
             NUM_IMG_TOKENS=576
 
-            # if output_attentions and generation_config.image_start_pos is not None and generation_config.attn_mask:
-            #     pos = generation_config.image_start_pos
-            #     true_vis_attn_weight = layer_outputs[1][0, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
-            #     all_attn_weights += (true_vis_attn_weight, )
+            if output_attentions and generation_config.image_start_pos is not None and generation_config.attn_mask:
+                pos = generation_config.image_start_pos
+                true_vis_attn_weight = layer_outputs[1][0, :, -1, pos:pos+NUM_IMG_TOKENS].mean(dim=0).to(torch.float32).detach().cpu().numpy().reshape(24, 24)
+                all_attn_weights += (true_vis_attn_weight, )
                 
-            #     if layer_idx == target_layer_idx-1:
-            #         max_jsd_idx, max_jsd_diff = find_max_jsd_and_diff(all_attn_weights)                
-            
-
+                if layer_idx == target_layer_idx-1:
+                    max_jsd_idx, max_jsd_diff = find_max_jsd_and_diff(all_attn_weights)                
 
 
             # attn_weights = layer_outputs[1] if output_hidden_states else None

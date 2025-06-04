@@ -28,6 +28,8 @@ def train(args, model, loss_fn, dataloader, device, lora_output_dir):
         pbar = tqdm(enumerate(dataloader), total=len(dataloader), desc=f"Epoch {epoch}", ncols=100)
         for step, batch in pbar:
 
+            ipdb.set_trace()
+            
             batch = {k: v.to(device) for k, v in batch.items()}
             outputs = model(**batch, output_attentions=True)
 
@@ -115,7 +117,9 @@ def main(args):
         # target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
         task_type="CAUSAL_LM",
     )
+
     # ipdb.set_trace()
+    
     # 是否可用
     print("CUDA available:", torch.cuda.is_available())
     
