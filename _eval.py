@@ -90,6 +90,7 @@ def _eval(args, epoch=None, model=None):
     # generation_config.generation_mode = "dola_generation"  # 你可也用枚举或字符串标记
     generation_config.attn_layer_idx = args.attn_layer_idx
     generation_config.target_layer_idx = args.target_layer_idx
+    generation_config.mask_ratio = args.mask_ratio
     generation_config.dola_layers = "low"
 
     generation_config.output_attentions = True
@@ -106,6 +107,7 @@ def _eval(args, epoch=None, model=None):
 
         image = [Image.open(image_path).convert("RGB") for image_path in image_paths]
         image_tensor = process_images(image, image_processor, model.config).to(torch.bfloat16)
+        ipdb.set_trace()
 
 
         

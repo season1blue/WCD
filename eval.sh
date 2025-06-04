@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# nohup bash eval.sh > global_log.txt 2>&1 &
+# nohup bash tmpeval.sh > global_log.txt 2>&1 &
 
 get_best_gpu() {
     nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits \
@@ -22,38 +22,36 @@ batch_size=1
 attn_layer_idx=17
 result_path="result_${CUDA_VISIBLE_DEVICES}.json"
 
-log_output=true
+target_layer_idx=29
 
-for task in docvqa
-do
-    
-    for target_layer_idx in {3..31}
+timestamp=$(date +%Y%m%d_%H%M%S)
+tmp_py="tmp_eval_${timestamp}.py"
+cp _eval.py "$tmp_py"
+
+log_output=false
+for task in gqa
     do
-
+    for mask_ratio in 0.2
+    do
         lora_name=$task-$target_layer_idx
-        log_path="log/log_${task}.log"
+        log_path="log/jsd_idx/log_$task.log"
 
-        cmd="python _eval.py \
-            --model $model \
-            --task $task \
-            --max_sample $max_sample \
-            --lora_name $lora_name \
-            --batch_size $batch_size \
-            --attn_layer_idx $attn_layer_idx \
-            --target_layer_idx $target_layer_idx \
-            --result_path $result_path \
-            "
+        cmd="python $tmp_py  --model $model --task $task  --max_sample $max_sample --lora_name $lora_name --batch_size $batch_size --attn_layer_idx $attn_layer_idx --target_layer_idx $target_layer_idx --result_path $result_path --mask_ratio $mask_ratio "
 
         if [ "$log_output" = true ]; then
             echo "Running target_layer_idx=$target_layer_idx" >> "$log_path"
+            echo "Mask ratio=$mask_ratio" >> "$log_path"
             echo "Executing: $cmd" >> "$log_path"
-            eval $cmd >> "$log_path" 2>&1
+            nohup bash -c "$cmd" >> "$log_path" 2>&1
         else
             echo "Running target_layer_idx=$target_layer_idx"
+            echo "Mask ratio=$mask_ratio"
             echo "Executing: $cmd"
-            eval $cmd
+            eval "$cmd"
         fi
         
         sleep 1  # 避免瞬间启动多个任务造成冲突
     done
 done
+# 本批次执行完后删除
+rm "$tmp_py"
