@@ -122,8 +122,8 @@ def evaluate_textvqa(datas):
             continue
         raw_acc = get_acc(raw_answer, answers)
         crop_acc = 0
-        if raw_acc == 0:
-            print(data)
+        # if raw_acc == 0:
+        #     print(data)
 
         raw_accs.append(raw_acc)
         crop_accs.append(crop_acc)
@@ -233,8 +233,6 @@ def evaluate_gqa(datas):
         # crop_acc = get_acc_gqa(crop_answer, answers)
         # print(raw_answer, crop_answer, answers)
         # print(raw_acc, crop_acc)
-        if raw_acc == 0:
-            print(data)
         
         raw_accs.append(raw_acc)
         crop_accs.append(crop_acc)
@@ -278,9 +276,6 @@ def evaluate_docvqa(datas):
         raw_acc = 1 if sum([raw_answer in answer or answer in raw_answer for answer in answers]) > 0 else 0
         crop_acc = 1 if sum([crop_answer in answer or answer in crop_answer for answer in answers]) > 0 else 0
 
-        if raw_acc == 0:
-            print(data)
-            
         raw_accs.append(raw_acc)
         crop_accs.append(crop_acc)
 

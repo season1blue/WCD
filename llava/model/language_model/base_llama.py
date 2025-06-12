@@ -152,7 +152,8 @@ def find_max_jsd_and_diff(all_attn_weights, compare_idx=None):
             max_idx = i
             max_diff = all_attn_weights[-1] - all_attn_weights[i]
     
-    max_diff[max_diff < 0] = 1e-9
+    if max_diff is not None:
+        max_diff[max_diff < 0] = 1e-9
 
     return max_idx, max_diff
 
@@ -313,7 +314,6 @@ class LlamaModel(LlamaPreTrainedModel):
 
             # 在生成第一个词的第31层
             if output_attentions and generation_config.image_start_pos is not None and layer_idx == target_layer_idx and generation_config.attn_mask:
-                print("jsd=",max_jsd_idx)
                 masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), max_jsd_diff, image_start_pos=generation_config.image_start_pos, mask_ratio=generation_config.mask_ratio, mask_scale=1e-9)
                 
                 hidden_states = masked_hidden_states
@@ -548,7 +548,6 @@ class LlamaForCausalLM(MyGenerationMixin, LlamaPreTrainedModel):
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
         )
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
-
 
 
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)

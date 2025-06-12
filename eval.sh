@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# nohup bash tmpeval.sh > global_log.txt 2>&1 &
+# nohup bash eval.sh > global_log.txt 2>&1 &
 
 get_best_gpu() {
     nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits \
@@ -13,30 +13,32 @@ export CUDA_VISIBLE_DEVICES=$GPU_ID
 echo "Selected GPU $CUDA_VISIBLE_DEVICES"
 
 
-
-task="vqav2"
-model="llava_new"
+# llava_new_1.6_7
+model="llava_new_1.6_7"
 method="rel_att"
 max_sample=1000
 batch_size=1
 attn_layer_idx=17
 result_path="result_${CUDA_VISIBLE_DEVICES}.json"
 
-target_layer_idx=29
+# timestamp=$(date +%Y%m%d_%H%M%S)
+# tmp_py="tmp_eval_${timestamp}.py"
+# cp _eval.py "$tmp_py"
 
-timestamp=$(date +%Y%m%d_%H%M%S)
-tmp_py="tmp_eval_${timestamp}.py"
-cp _eval.py "$tmp_py"
+# gqa vqav2 okvqa vizwiz textvqa docvqa
+
+mask_ratio=1
+# 1 2 32 33 34 35 36 37 38 39
 
 log_output=false
-for task in gqa
+for task in okvqa
     do
-    for mask_ratio in 0.2
+    for target_layer_idx in 12
     do
-        lora_name=$task-$target_layer_idx
-        log_path="log/jsd_idx/log_$task.log"
+        lora_name=$task-$target_layer_idx-$model-$mask_ratio
+        log_path="log/1.6-7b-exp/log_$task.log"
 
-        cmd="python $tmp_py  --model $model --task $task  --max_sample $max_sample --lora_name $lora_name --batch_size $batch_size --attn_layer_idx $attn_layer_idx --target_layer_idx $target_layer_idx --result_path $result_path --mask_ratio $mask_ratio "
+        cmd="python _eval.py  --model $model --task $task  --max_sample $max_sample --lora_name $lora_name --batch_size $batch_size --attn_layer_idx $attn_layer_idx --target_layer_idx $target_layer_idx --result_path $result_path --mask_ratio $mask_ratio "
 
         if [ "$log_output" = true ]; then
             echo "Running target_layer_idx=$target_layer_idx" >> "$log_path"
@@ -54,4 +56,3 @@ for task in gqa
     done
 done
 # 本批次执行完后删除
-rm "$tmp_py"

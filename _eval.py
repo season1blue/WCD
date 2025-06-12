@@ -91,13 +91,15 @@ def _eval(args, epoch=None, model=None):
     generation_config.attn_layer_idx = args.attn_layer_idx
     generation_config.target_layer_idx = args.target_layer_idx
     generation_config.mask_ratio = args.mask_ratio
+
     generation_config.dola_layers = "low"
+    # generation_config.dola_layers = [i for i in range(32)]
+    generation_config.attn_diff = True
 
     generation_config.output_attentions = True
     # generation_config.return_dict_in_generate = False
 
     generation_config.attn_mask = True
-    generation_config.attn_diff = True
     
     begin_time = time.time()
     
@@ -107,9 +109,6 @@ def _eval(args, epoch=None, model=None):
 
         image = [Image.open(image_path).convert("RGB") for image_path in image_paths]
         image_tensor = process_images(image, image_processor, model.config).to(torch.bfloat16)
-        ipdb.set_trace()
-
-
         
         if generation_config.return_dict_in_generate:
             # PRE general
@@ -240,8 +239,9 @@ def _eval(args, epoch=None, model=None):
         'acc': acc,
     }
     report_path = os.path.join(args.save_path, args.result_path)
-
-    print(f"Acc: {acc} write into {report_path}")
+    curr_time = datetime.now().strftime("%Y-%m-%dd %H:%M:%S")
+    
+    print(f"Time: {curr_time}, Version: {args.lora_name}, Acc: {acc} write into {report_path}")
     with open(report_path, 'a') as f:
         json.dump(result, f, indent=4)
         f.write('\n')  # 添加换行符

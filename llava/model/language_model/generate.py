@@ -2119,7 +2119,6 @@ class MyGenerationMixin:
                 is_encoder_decoder=self.config.is_encoder_decoder,
                 **model_kwargs,
             )
-
             # 12. run sample (it degenerates to greedy search when `generation_config.do_sample=False`)
             result = self._sample(
                 input_ids,
@@ -2128,6 +2127,7 @@ class MyGenerationMixin:
                 generation_config=generation_config,
                 synced_gpus=synced_gpus,
                 streamer=streamer,
+                _input_ids=_input_ids,
                 **model_kwargs,
             )
 
@@ -2517,7 +2517,6 @@ class MyGenerationMixin:
             # x 代表新生成的token的位置  
             # _x_token_general_attention里面有32个attention，每个att代表一层的attention，
             # 第一层x=0：32*torch.Size([1, 32, 637, 637])， 第二层x=1: 32*torch.Size([1,32,1,638])
-            # ipdb.set_trace()  
         else:
             _x_token_general_attention = None
         
@@ -2648,7 +2647,6 @@ class MyGenerationMixin:
             this_peer_finished = unfinished_sequences.max() == 0
         
         
-        # ipdb.set_trace()
         
         if streamer is not None:
             streamer.end()
@@ -3142,6 +3140,13 @@ class MyGenerationMixin:
         unfinished_sequences = torch.ones(batch_size, dtype=torch.long, device=input_ids.device)
         model_kwargs = self._get_initial_cache_position(input_ids, model_kwargs)
 
+
+        _input_ids = model_kwargs["_input_ids"]
+        pos = _input_ids[0].tolist().index(-200)  # batchsize = 1的时候
+        generation_config.image_start_pos = pos
+        
+        
+        gen_count = 0
         while self._has_unfinished_sequences(
             this_peer_finished, synced_gpus, device=input_ids.device, cur_len=cur_len, max_length=max_length
         ):
@@ -3153,7 +3158,24 @@ class MyGenerationMixin:
             model_inputs.update({"output_hidden_states": output_hidden_states} if output_hidden_states else {})
 
             # forward pass to get next token
-            outputs = self(**model_inputs, return_dict=True)
+            
+            if gen_count < 1:
+                
+                # forward pass to get next token
+                outputs = self(
+                    **model_inputs,
+                    return_dict=True,
+                    generation_config=generation_config
+                )
+            else:
+                generation_config.image_start_pos = None
+                outputs = self(
+                    **model_inputs,
+                    return_dict=True,
+                    generation_config=generation_config
+                )   
+
+            gen_count += 1
 
             if synced_gpus and this_peer_finished:
                 continue  # don't waste resources running the code we don't need

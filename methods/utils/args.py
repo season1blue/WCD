@@ -50,8 +50,9 @@ model_to_fullname = {
     "llava": "llava-hf/llava-1.5-7b-hf",
     "blip": "Salesforce/instructblip-vicuna-7b",
     "qwen2_5": "Qwen/Qwen2.5-VL-3B-Instruct",
-    "llava_new": "liuhaotian/llava-v1.5-7b",
-    "llava_new_13": "liuhaotian/llava-v1.5-13b"
+    "llava_new_7": "liuhaotian/llava-v1.5-7b",
+    "llava_new_13": "liuhaotian/llava-v1.5-13b",
+    "llava_new_1.6_7": "liuhaotian/llava-v1.6-vicuna-7b"
 }
 
 def load_args():

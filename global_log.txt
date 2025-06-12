@@ -1,0 +1,3 @@
+nohup: ignoring input
+Selected GPU 1
+eval.sh: line 58: $'\211\271次执行完后删除': command not found

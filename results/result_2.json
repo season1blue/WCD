@@ -402,3 +402,668 @@
     "time": "2025-05-28d 19:19:39",
     "acc": 24.3
 }
+{
+    "version": "textvqa-0-llava_new_13-1",
+    "epoch": null,
+    "run_time": 661.5023412704468,
+    "time": "2025-06-06d 00:46:45",
+    "acc": 6.6
+}
+{
+    "version": "textvqa-3-llava_new_13-1",
+    "epoch": null,
+    "run_time": 34083.69287633896,
+    "time": "2025-06-06d 10:15:34",
+    "acc": 3.2
+}
+{
+    "version": "textvqa-4-llava_new_13-1",
+    "epoch": null,
+    "run_time": 29263.262382268906,
+    "time": "2025-06-06d 18:23:34",
+    "acc": 3.4
+}
+{
+    "version": "textvqa-5-llava_new_13-1",
+    "epoch": null,
+    "run_time": 754.7522094249725,
+    "time": "2025-06-06d 18:36:24",
+    "acc": 8.0
+}
+{
+    "version": "textvqa-6-llava_new_13-1",
+    "epoch": null,
+    "run_time": 219.9532871246338,
+    "time": "2025-06-06d 18:40:27",
+    "acc": 0.3
+}
+{
+    "version": "textvqa-7-llava_new_13-1",
+    "epoch": null,
+    "run_time": 321.75294971466064,
+    "time": "2025-06-06d 18:46:05",
+    "acc": 4.2
+}
+{
+    "version": "textvqa-8-llava_new_13-1",
+    "epoch": null,
+    "run_time": 153.765056848526,
+    "time": "2025-06-06d 18:48:55",
+    "acc": 0.8
+}
+{
+    "version": "textvqa-9-llava_new_13-1",
+    "epoch": null,
+    "run_time": 807.8265333175659,
+    "time": "2025-06-06d 19:02:35",
+    "acc": 5.5
+}
+{
+    "version": "textvqa-10-llava_new_13-1",
+    "epoch": null,
+    "run_time": 37021.29223203659,
+    "time": "2025-06-07d 05:19:57",
+    "acc": 1.7
+}
+{
+    "version": "textvqa-11-llava_new_13-1",
+    "epoch": null,
+    "run_time": 210.6132309436798,
+    "time": "2025-06-07d 05:23:41",
+    "acc": 0.9
+}
+{
+    "version": "textvqa-12-llava_new_13-1",
+    "epoch": null,
+    "run_time": 28241.252012968063,
+    "time": "2025-06-07d 13:14:35",
+    "acc": 9.6
+}
+{
+    "version": "textvqa-13-llava_new_13-1",
+    "epoch": null,
+    "run_time": 37307.55368041992,
+    "time": "2025-06-07d 23:36:46",
+    "acc": 8.9
+}
+{
+    "version": "textvqa-14-llava_new_13-1",
+    "epoch": null,
+    "run_time": 37528.00920176506,
+    "time": "2025-06-08d 10:02:30",
+    "acc": 8.8
+}
+{
+    "version": "textvqa-15-llava_new_13-1",
+    "epoch": null,
+    "run_time": 22943.9688975811,
+    "time": "2025-06-08d 16:25:07",
+    "acc": 8.0
+}
+{
+    "version": "textvqa-16-llava_new_13-1",
+    "epoch": null,
+    "run_time": 36017.16821360588,
+    "time": "2025-06-09d 02:25:40",
+    "acc": 7.5
+}
+{
+    "version": "textvqa-17-llava_new_13-1",
+    "epoch": null,
+    "run_time": 321.7490425109863,
+    "time": "2025-06-09d 02:32:54",
+    "acc": 28.3
+}
+{
+    "version": "textvqa-18-llava_new_13-1",
+    "epoch": null,
+    "run_time": 495.4016184806824,
+    "time": "2025-06-09d 02:42:34",
+    "acc": 18.5
+}
+{
+    "version": "textvqa-19-llava_new_13-1",
+    "epoch": null,
+    "run_time": 1466.593405008316,
+    "time": "2025-06-09d 03:08:14",
+    "acc": 26.2
+}
+{
+    "version": "textvqa-20-llava_new_13-1",
+    "epoch": null,
+    "run_time": 412.81869745254517,
+    "time": "2025-06-09d 03:15:22",
+    "acc": 39.8
+}
+{
+    "version": "textvqa-21-llava_new_13-1",
+    "epoch": null,
+    "run_time": 649.0009567737579,
+    "time": "2025-06-09d 03:26:31",
+    "acc": 31.0
+}
+{
+    "version": "textvqa-22-llava_new_13-1",
+    "epoch": null,
+    "run_time": 359.4818813800812,
+    "time": "2025-06-09d 03:32:42",
+    "acc": 51.2
+}
+{
+    "version": "textvqa-23-llava_new_13-1",
+    "epoch": null,
+    "run_time": 365.11438751220703,
+    "time": "2025-06-09d 03:39:08",
+    "acc": 50.5
+}
+{
+    "version": "textvqa-24-llava_new_13-1",
+    "epoch": null,
+    "run_time": 286.09536600112915,
+    "time": "2025-06-09d 03:44:08",
+    "acc": 54.3
+}
+{
+    "version": "textvqa-25-llava_new_13-1",
+    "epoch": null,
+    "run_time": 344.051851272583,
+    "time": "2025-06-09d 03:50:05",
+    "acc": 54.1
+}
+{
+    "version": "textvqa-26-llava_new_13-1",
+    "epoch": null,
+    "run_time": 517.0114421844482,
+    "time": "2025-06-09d 03:58:56",
+    "acc": 55.1
+}
+{
+    "version": "textvqa-27-llava_new_13-1",
+    "epoch": null,
+    "run_time": 1474.5385653972626,
+    "time": "2025-06-09d 04:23:45",
+    "acc": 55.2
+}
+{
+    "version": "textvqa-28-llava_new_13-1",
+    "epoch": null,
+    "run_time": 2620.6800858974457,
+    "time": "2025-06-09d 05:07:41",
+    "acc": 53.4
+}
+{
+    "version": "textvqa-29-llava_new_13-1",
+    "epoch": null,
+    "run_time": 383.88183426856995,
+    "time": "2025-06-09d 05:14:25",
+    "acc": 57.2
+}
+{
+    "version": "textvqa-30-llava_new_13-1",
+    "epoch": null,
+    "run_time": 1112.445121049881,
+    "time": "2025-06-09d 05:33:18",
+    "acc": 53.2
+}
+{
+    "version": "textvqa-31-llava_new_13-1",
+    "epoch": null,
+    "run_time": 1327.2468411922455,
+    "time": "2025-06-09d 05:55:38",
+    "acc": 55.5
+}
+{
+    "version": "vqav2-0-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 1720.4350872039795,
+    "time": "2025-06-09d 17:41:49",
+    "acc": 76.71
+}
+{
+    "version": "gqa-0-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 545.3867809772491,
+    "time": "2025-06-09d 19:38:18",
+    "acc": 71.7
+}
+{
+    "version": "gqa-1-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 602.2986176013947,
+    "time": "2025-06-09d 19:48:55",
+    "acc": 57.1
+}
+{
+    "version": "gqa-2-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 24578.545705080032,
+    "time": "2025-06-10d 02:38:53",
+    "acc": 10.5
+}
+{
+    "version": "gqa-3-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 615.4620769023895,
+    "time": "2025-06-10d 02:49:26",
+    "acc": 11.9
+}
+{
+    "version": "gqa-4-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 1333.4345664978027,
+    "time": "2025-06-10d 03:11:56",
+    "acc": 21.3
+}
+{
+    "version": "gqa-5-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 425.1432909965515,
+    "time": "2025-06-10d 03:19:17",
+    "acc": 64.7
+}
+{
+    "version": "gqa-6-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 460.52850675582886,
+    "time": "2025-06-10d 03:27:13",
+    "acc": 41.4
+}
+{
+    "version": "gqa-7-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 417.6946928501129,
+    "time": "2025-06-10d 03:34:27",
+    "acc": 66.6
+}
+{
+    "version": "gqa-8-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 3280.5740401744843,
+    "time": "2025-06-10d 04:29:24",
+    "acc": 30.5
+}
+{
+    "version": "gqa-9-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 421.2638466358185,
+    "time": "2025-06-10d 04:36:41",
+    "acc": 63.4
+}
+{
+    "version": "gqa-10-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 419.43012619018555,
+    "time": "2025-06-10d 04:43:55",
+    "acc": 65.0
+}
+{
+    "version": "gqa-11-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 748.9170596599579,
+    "time": "2025-06-10d 04:56:40",
+    "acc": 45.2
+}
+{
+    "version": "gqa-12-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 669.6820483207703,
+    "time": "2025-06-10d 05:08:04",
+    "acc": 8.9
+}
+{
+    "version": "gqa-13-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 29169.657341957092,
+    "time": "2025-06-10d 13:14:29",
+    "acc": 20.1
+}
+{
+    "version": "gqa-14-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 594.9684672355652,
+    "time": "2025-06-10d 13:24:57",
+    "acc": 69.6
+}
+{
+    "version": "gqa-15-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 517.8987150192261,
+    "time": "2025-06-10d 13:33:56",
+    "acc": 71.2
+}
+{
+    "version": "gqa-16-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 614.8022699356079,
+    "time": "2025-06-10d 13:44:32",
+    "acc": 70.2
+}
+{
+    "version": "gqa-17-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 516.2367079257965,
+    "time": "2025-06-10d 13:53:38",
+    "acc": 69.7
+}
+{
+    "version": "gqa-18-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 535.9622640609741,
+    "time": "2025-06-10d 14:02:57",
+    "acc": 70.6
+}
+{
+    "version": "gqa-19-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 593.6034696102142,
+    "time": "2025-06-10d 14:13:14",
+    "acc": 70.1
+}
+{
+    "version": "gqa-20-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 520.0408163070679,
+    "time": "2025-06-10d 14:22:16",
+    "acc": 69.9
+}
+{
+    "version": "gqa-21-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 634.9656879901886,
+    "time": "2025-06-10d 14:33:13",
+    "acc": 69.8
+}
+{
+    "version": "gqa-22-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 537.586697101593,
+    "time": "2025-06-10d 14:42:38",
+    "acc": 70.1
+}
+{
+    "version": "gqa-23-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 572.5641508102417,
+    "time": "2025-06-10d 14:52:36",
+    "acc": 70.5
+}
+{
+    "version": "gqa-24-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 636.6989133358002,
+    "time": "2025-06-10d 15:03:37",
+    "acc": 69.9
+}
+{
+    "version": "gqa-25-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 543.4822955131531,
+    "time": "2025-06-10d 15:13:05",
+    "acc": 70.9
+}
+{
+    "version": "gqa-26-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 663.7411797046661,
+    "time": "2025-06-10d 15:24:33",
+    "acc": 70.4
+}
+{
+    "version": "gqa-27-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 537.4852404594421,
+    "time": "2025-06-10d 15:34:02",
+    "acc": 70.5
+}
+{
+    "version": "gqa-28-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 627.2907564640045,
+    "time": "2025-06-10d 15:44:54",
+    "acc": 74.0
+}
+{
+    "version": "gqa-30-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 877.586704492569,
+    "time": "2025-06-10d 20:52:33",
+    "acc": 70.9
+}
+{
+    "version": "gqa-31-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 608.373931646347,
+    "time": "2025-06-10d 21:03:15",
+    "acc": 74.6
+}
+{
+    "version": "textvqa-0-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 870.3132290840149,
+    "time": "2025-06-10d 21:21:08",
+    "acc": 72.4
+}
+{
+    "version": "textvqa-0-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 733.0020673274994,
+    "time": "2025-06-10d 21:53:34",
+    "acc": 72.1
+}
+{
+    "version": "textvqa-1-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 954.406858921051,
+    "time": "2025-06-10d 22:09:51",
+    "acc": 63.1
+}
+{
+    "version": "textvqa-2-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 34666.952920913696,
+    "time": "2025-06-11d 07:48:00",
+    "acc": 17.1
+}
+{
+    "version": "textvqa-3-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 4357.644612312317,
+    "time": "2025-06-11d 09:01:00",
+    "acc": 31.7
+}
+{
+    "version": "textvqa-4-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 2543.721859931946,
+    "time": "2025-06-11d 09:43:45",
+    "acc": 18.6
+}
+{
+    "version": "textvqa-5-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 795.1977677345276,
+    "time": "2025-06-11d 09:57:24",
+    "acc": 68.8
+}
+{
+    "version": "textvqa-6-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 1139.0338957309723,
+    "time": "2025-06-11d 10:16:44",
+    "acc": 43.1
+}
+{
+    "version": "textvqa-7-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 917.6512701511383,
+    "time": "2025-06-11d 10:32:24",
+    "acc": 66.2
+}
+{
+    "version": "textvqa-8-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 9784.019196033478,
+    "time": "2025-06-11d 13:15:51",
+    "acc": 35.4
+}
+{
+    "version": "textvqa-9-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 765.132773399353,
+    "time": "2025-06-11d 13:28:53",
+    "acc": 62.0
+}
+{
+    "version": "textvqa-10-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 642.8016304969788,
+    "time": "2025-06-11d 13:39:58",
+    "acc": 63.3
+}
+{
+    "version": "textvqa-11-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 2651.161196708679,
+    "time": "2025-06-11d 14:24:31",
+    "acc": 38.6
+}
+{
+    "version": "textvqa-12-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 3282.011419773102,
+    "time": "2025-06-11d 15:19:47",
+    "acc": 4.3
+}
+{
+    "version": "textvqa-13-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 27109.261286735535,
+    "time": "2025-06-11d 22:52:05",
+    "acc": 13.6
+}
+{
+    "version": "textvqa-14-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 687.9015650749207,
+    "time": "2025-06-11d 23:03:51",
+    "acc": 43.2
+}
+{
+    "version": "textvqa-15-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 4903.733017921448,
+    "time": "2025-06-12d 00:25:51",
+    "acc": 45.9
+}
+{
+    "version": "textvqa-16-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 738.5006778240204,
+    "time": "2025-06-12d 00:38:27",
+    "acc": 51.9
+}
+{
+    "version": "textvqa-17-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 686.3569231033325,
+    "time": "2025-06-12d 00:50:11",
+    "acc": 73.3
+}
+{
+    "version": "textvqa-18-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 613.0999064445496,
+    "time": "2025-06-12d 01:00:41",
+    "acc": 67.8
+}
+{
+    "version": "textvqa-19-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 567.5644640922546,
+    "time": "2025-06-12d 01:10:25",
+    "acc": 75.1
+}
+{
+    "version": "textvqa-20-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 541.7969572544098,
+    "time": "2025-06-12d 01:19:45",
+    "acc": 72.6
+}
+{
+    "version": "textvqa-21-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 541.3261072635651,
+    "time": "2025-06-12d 01:29:03",
+    "acc": 69.3
+}
+{
+    "version": "textvqa-22-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 542.3329105377197,
+    "time": "2025-06-12d 01:38:22",
+    "acc": 76.5
+}
+{
+    "version": "textvqa-23-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 543.7179956436157,
+    "time": "2025-06-12d 01:47:42",
+    "acc": 75.7
+}
+{
+    "version": "textvqa-24-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 545.4711186885834,
+    "time": "2025-06-12d 01:57:04",
+    "acc": 76.4
+}
+{
+    "version": "textvqa-25-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 568.9221935272217,
+    "time": "2025-06-12d 02:06:51",
+    "acc": 76.2
+}
+{
+    "version": "textvqa-26-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 543.3978371620178,
+    "time": "2025-06-12d 02:16:11",
+    "acc": 76.8
+}
+{
+    "version": "textvqa-27-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 570.6783556938171,
+    "time": "2025-06-12d 02:25:59",
+    "acc": 76.8
+}
+{
+    "version": "textvqa-28-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 568.4610867500305,
+    "time": "2025-06-12d 02:35:43",
+    "acc": 76.2
+}
+{
+    "version": "textvqa-29-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 28582.996510267258,
+    "time": "2025-06-12d 10:32:26",
+    "acc": 0.0
+}
+{
+    "version": "textvqa-30-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 2675.245943546295,
+    "time": "2025-06-12d 11:17:18",
+    "acc": 72.0
+}
+{
+    "version": "textvqa-31-llava_new_1.6_7-1",
+    "epoch": null,
+    "run_time": 550.9810104370117,
+    "time": "2025-06-12d 11:26:47",
+    "acc": 76.9
+}
