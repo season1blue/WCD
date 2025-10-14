@@ -16,8 +16,8 @@
 
 import warnings
 
-from ...configuration_utils import PreTrainedConfig, layer_type_validation
-from ...utils import logging
+from transformers.configuration_utils import PreTrainedConfig, layer_type_validation
+from transformers.utils import logging
 
 
 logger = logging.get_logger(__name__)

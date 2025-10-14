@@ -54,7 +54,8 @@ model_to_fullname = {
     "llava_new_13": "liuhaotian/llava-v1.5-13b",
     "llava_new_1.6_7": "liuhaotian/llava-v1.6-vicuna-7b",
     "qwen2": "Qwen/Qwen2-VL-7B-Instruct",
-    "qwen2.5":"Qwen/Qwen2.5-VL-7B-Instruct"
+    "qwen2.5":"Qwen/Qwen2.5-VL-7B-Instruct",
+    "llama4": "meta-llama/Llama-4-Scout-17B-16E-Instruct"
 }
 
 def load_args():
@@ -87,7 +88,8 @@ def load_args():
 
     args.device = "cuda" if torch.cuda.is_available() else "cpu"
     output_name = f'{args.model}-{args.task}-{args.method}-{args.lora_name}'
-    args.model_id = model_to_fullname[args.model]
+    args.model_path = model_to_fullname[args.model]
+    args.model_id = args.model
 
     # args.output_path = os.path.join(args.save_path, "jsons", f"{output_name}.json")
     # args.ckpt_path = os.path.join(args.save_path, "ckpts", f"{output_name}")

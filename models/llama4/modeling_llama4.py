@@ -22,22 +22,22 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from transformers.models.llama4.configuration_llama4 import Llama4VisionConfig
+from models.llama4.configuration_llama4 import Llama4VisionConfig
 
-from ...activations import ACT2FN
-from ...cache_utils import Cache, DynamicCache
-from ...generation import GenerationMixin
-from ...integrations import use_kernel_forward_from_hub
-from ...masking_utils import create_causal_mask, create_chunked_causal_mask
-from ...modeling_flash_attention_utils import FlashAttentionKwargs
-from ...modeling_layers import GradientCheckpointingLayer
-from ...modeling_outputs import BaseModelOutput, BaseModelOutputWithPast, CausalLMOutputWithPast, ModelOutput
-from ...modeling_rope_utils import ROPE_INIT_FUNCTIONS, dynamic_rope_update
-from ...modeling_utils import ALL_ATTENTION_FUNCTIONS, PreTrainedModel
-from ...processing_utils import Unpack
-from ...utils import TransformersKwargs, auto_docstring, can_return_tuple, logging
-from ...utils.deprecation import deprecate_kwarg
-from ...utils.generic import check_model_inputs
+from transformers.activations import ACT2FN
+from transformers.cache_utils import Cache, DynamicCache
+from transformers.generation import GenerationMixin
+from transformers.integrations import use_kernel_forward_from_hub
+from transformers.masking_utils import create_causal_mask, create_chunked_causal_mask
+from transformers.modeling_flash_attention_utils import FlashAttentionKwargs
+from transformers.modeling_layers import GradientCheckpointingLayer
+from transformers.modeling_outputs import BaseModelOutput, BaseModelOutputWithPast, CausalLMOutputWithPast, ModelOutput
+from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS, dynamic_rope_update
+from transformers.modeling_utils import ALL_ATTENTION_FUNCTIONS, PreTrainedModel
+from transformers.processing_utils import Unpack
+from transformers.utils import TransformersKwargs, auto_docstring, can_return_tuple, logging
+from transformers.utils.deprecation import deprecate_kwarg
+from transformers.utils.generic import check_model_inputs
 from .configuration_llama4 import Llama4Config, Llama4TextConfig
 
 

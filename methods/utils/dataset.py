@@ -9,10 +9,10 @@ import ipdb
 import torch
 import tokenizers
 
-from llava.constants import IGNORE_INDEX, IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
-from llava.train.train import LazySupervisedDataset, DataArguments,  tokenizer_image_token
+from models.llava.constants import IGNORE_INDEX, IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
+from models.llava.train.train import LazySupervisedDataset, DataArguments,  tokenizer_image_token
+from models.llava import conversation as conversation_lib
 import copy
-from llava import conversation as conversation_lib
 import transformers
 from dataclasses import dataclass
 from typing import Dict, Optional, Sequence, List
