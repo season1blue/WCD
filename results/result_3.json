@@ -465,3 +465,332 @@
     "time": "2025-06-09d 08:49:43",
     "acc": 22.2
 }
+{
+    "version": "okvqa-31-qwen-1",
+    "epoch": null,
+    "run_time": 698.9095392227173,
+    "time": "2025-07-23d 10:05:37",
+    "acc": 55.96
+}
+{
+    "version": "okvqa-30-qwen-1",
+    "epoch": null,
+    "run_time": 697.8104510307312,
+    "time": "2025-07-23d 10:17:36",
+    "acc": 55.96
+}
+{
+    "version": "okvqa-29-qwen-1",
+    "epoch": null,
+    "run_time": 697.4158685207367,
+    "time": "2025-07-23d 10:29:33",
+    "acc": 55.96
+}
+{
+    "version": "okvqa-28-qwen-1",
+    "epoch": null,
+    "run_time": 1121.880407333374,
+    "time": "2025-07-23d 10:48:36",
+    "acc": 55.96
+}
+{
+    "version": "okvqa-27-qwen-1",
+    "epoch": null,
+    "run_time": 1483.2094459533691,
+    "time": "2025-07-23d 11:13:43",
+    "acc": 54.94
+}
+{
+    "version": "okvqa-26-qwen-1",
+    "epoch": null,
+    "run_time": 1538.764548778534,
+    "time": "2025-07-23d 11:39:57",
+    "acc": 51.5
+}
+{
+    "version": "okvqa-25-qwen-1",
+    "epoch": null,
+    "run_time": 1486.6974165439606,
+    "time": "2025-07-23d 12:05:05",
+    "acc": 53.26
+}
+{
+    "version": "okvqa-24-qwen-1",
+    "epoch": null,
+    "run_time": 2364.65806555748,
+    "time": "2025-07-23d 12:44:50",
+    "acc": 33.68
+}
+{
+    "version": "okvqa-23-qwen-1",
+    "epoch": null,
+    "run_time": 1496.4780912399292,
+    "time": "2025-07-23d 13:10:07",
+    "acc": 49.46
+}
+{
+    "version": "okvqa-22-qwen-1",
+    "epoch": null,
+    "run_time": 1467.6185767650604,
+    "time": "2025-07-23d 13:34:55",
+    "acc": 49.3
+}
+{
+    "version": "okvqa-21-qwen-1",
+    "epoch": null,
+    "run_time": 1487.7042572498322,
+    "time": "2025-07-23d 14:00:05",
+    "acc": 32.94
+}
+{
+    "version": "okvqa-20-qwen-1",
+    "epoch": null,
+    "run_time": 1484.3307356834412,
+    "time": "2025-07-23d 14:25:12",
+    "acc": 41.46
+}
+{
+    "version": "okvqa-19-qwen-1",
+    "epoch": null,
+    "run_time": 1470.2020399570465,
+    "time": "2025-07-23d 14:50:04",
+    "acc": 35.64
+}
+{
+    "version": "okvqa-18-qwen-1",
+    "epoch": null,
+    "run_time": 1627.4663712978363,
+    "time": "2025-07-23d 15:17:36",
+    "acc": 30.5
+}
+{
+    "version": "okvqa-17-qwen-1",
+    "epoch": null,
+    "run_time": 11149.741647481918,
+    "time": "2025-07-23d 18:23:48",
+    "acc": 0.0
+}
+{
+    "version": "docvqa-0-qwen2-1",
+    "epoch": null,
+    "run_time": 1253.5310163497925,
+    "time": "2025-07-24d 09:58:45",
+    "acc": 2.5
+}
+{
+    "version": "docvqa-1-qwen2-1",
+    "epoch": null,
+    "run_time": 3370.834207057953,
+    "time": "2025-07-24d 10:55:09",
+    "acc": 3.0
+}
+{
+    "version": "docvqa-2-qwen2-1",
+    "epoch": null,
+    "run_time": 3424.7943799495697,
+    "time": "2025-07-24d 11:52:28",
+    "acc": 3.3
+}
+{
+    "version": "docvqa-3-qwen2-1",
+    "epoch": null,
+    "run_time": 3363.4725201129913,
+    "time": "2025-07-24d 12:48:46",
+    "acc": 0.1
+}
+{
+    "version": "docvqa-4-qwen2-1",
+    "epoch": null,
+    "run_time": 253.6949017047882,
+    "time": "2025-07-24d 12:53:15",
+    "acc": 0.2
+}
+{
+    "version": "docvqa-5-qwen2-1",
+    "epoch": null,
+    "run_time": 883.4192228317261,
+    "time": "2025-07-24d 13:08:16",
+    "acc": 8.0
+}
+{
+    "version": "docvqa-6-qwen2-1",
+    "epoch": null,
+    "run_time": 373.1898331642151,
+    "time": "2025-07-24d 13:14:43",
+    "acc": 13.8
+}
+{
+    "version": "docvqa-7-qwen2-1",
+    "epoch": null,
+    "run_time": 353.3697111606598,
+    "time": "2025-07-24d 13:20:51",
+    "acc": 12.0
+}
+{
+    "version": "docvqa-8-qwen2-1",
+    "epoch": null,
+    "run_time": 346.09654664993286,
+    "time": "2025-07-24d 13:26:52",
+    "acc": 8.7
+}
+{
+    "version": "docvqa-9-qwen2-1",
+    "epoch": null,
+    "run_time": 404.7964940071106,
+    "time": "2025-07-24d 13:33:54",
+    "acc": 9.5
+}
+{
+    "version": "docvqa-10-qwen2-1",
+    "epoch": null,
+    "run_time": 306.7748429775238,
+    "time": "2025-07-24d 13:39:16",
+    "acc": 8.1
+}
+{
+    "version": "docvqa-11-qwen2-1",
+    "epoch": null,
+    "run_time": 883.0663170814514,
+    "time": "2025-07-24d 13:54:13",
+    "acc": 10.4
+}
+{
+    "version": "docvqa-12-qwen2-1",
+    "epoch": null,
+    "run_time": 629.3279361724854,
+    "time": "2025-07-24d 14:04:59",
+    "acc": 5.2
+}
+{
+    "version": "docvqa-13-qwen2-1",
+    "epoch": null,
+    "run_time": 5303.929602146149,
+    "time": "2025-07-24d 15:33:38",
+    "acc": 3.5
+}
+{
+    "version": "docvqa-14-qwen2-1",
+    "epoch": null,
+    "run_time": 8333.650636434555,
+    "time": "2025-07-24d 17:52:49",
+    "acc": 5.4
+}
+{
+    "version": "docvqa-15-qwen2-1",
+    "epoch": null,
+    "run_time": 862.0089693069458,
+    "time": "2025-07-24d 18:07:26",
+    "acc": 9.8
+}
+{
+    "version": "docvqa-16-qwen2-1",
+    "epoch": null,
+    "run_time": 8427.588149785995,
+    "time": "2025-07-24d 20:28:09",
+    "acc": 5.8
+}
+{
+    "version": "docvqa-17-qwen2-1",
+    "epoch": null,
+    "run_time": 7971.278906822205,
+    "time": "2025-07-24d 22:41:18",
+    "acc": 3.1
+}
+{
+    "version": "docvqa-18-qwen2-1",
+    "epoch": null,
+    "run_time": 540.3337669372559,
+    "time": "2025-07-24d 22:50:32",
+    "acc": 12.0
+}
+{
+    "version": "docvqa-19-qwen2-1",
+    "epoch": null,
+    "run_time": 1057.9673562049866,
+    "time": "2025-07-24d 23:08:28",
+    "acc": 13.3
+}
+{
+    "version": "docvqa-20-qwen2-1",
+    "epoch": null,
+    "run_time": 2433.250024795532,
+    "time": "2025-07-24d 23:49:19",
+    "acc": 17.0
+}
+{
+    "version": "docvqa-21-qwen2-1",
+    "epoch": null,
+    "run_time": 1760.7821283340454,
+    "time": "2025-07-25d 00:18:57",
+    "acc": 13.7
+}
+{
+    "version": "docvqa-22-qwen2-1",
+    "epoch": null,
+    "run_time": 909.7354600429535,
+    "time": "2025-07-25d 00:34:25",
+    "acc": 23.3
+}
+{
+    "version": "docvqa-23-qwen2-1",
+    "epoch": null,
+    "run_time": 1173.340098142624,
+    "time": "2025-07-25d 00:54:14",
+    "acc": 72.4
+}
+{
+    "version": "docvqa-24-qwen2-1",
+    "epoch": null,
+    "run_time": 2805.4367640018463,
+    "time": "2025-07-25d 01:41:15",
+    "acc": 64.6
+}
+{
+    "version": "docvqa-25-qwen2-1",
+    "epoch": null,
+    "run_time": 468.64027428627014,
+    "time": "2025-07-25d 01:49:19",
+    "acc": 79.9
+}
+{
+    "version": "docvqa-26-qwen2-1",
+    "epoch": null,
+    "run_time": 557.521409034729,
+    "time": "2025-07-25d 01:58:52",
+    "acc": 80.3
+}
+{
+    "version": "docvqa-27-qwen2-1",
+    "epoch": null,
+    "run_time": 419.0138761997223,
+    "time": "2025-07-25d 02:06:06",
+    "acc": 85.0
+}
+{
+    "version": "docvqa-28-qwen2-1",
+    "epoch": null,
+    "run_time": 359.75333642959595,
+    "time": "2025-07-25d 02:12:20",
+    "acc": 87.6
+}
+{
+    "version": "docvqa-29-qwen2-1",
+    "epoch": null,
+    "run_time": 362.68685698509216,
+    "time": "2025-07-25d 02:18:37",
+    "acc": 87.6
+}
+{
+    "version": "docvqa-30-qwen2-1",
+    "epoch": null,
+    "run_time": 360.10831093788147,
+    "time": "2025-07-25d 02:24:50",
+    "acc": 87.6
+}
+{
+    "version": "docvqa-31-qwen2-1",
+    "epoch": null,
+    "run_time": 616.4595139026642,
+    "time": "2025-07-25d 02:35:21",
+    "acc": 87.6
+}

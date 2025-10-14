@@ -29,7 +29,6 @@ def custom_collate_fn(batch):
 
 
 
-from llava.model.builder import load_pretrained_model
 from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 from llava.conversation import conv_templates, SeparatorStyle
 from llava.model.builder import load_pretrained_model
@@ -37,29 +36,34 @@ from llava.utils import disable_torch_init
 from llava.mm_utils import tokenizer_image_token, process_images, get_model_name_from_path
 
 from transformers import GenerationConfig
-
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from qwen.qwen2_vl.modeling_qwen2_vl import Qwen2VLForConditionalGeneration
 
 def _eval(args, epoch=None, model=None):
 
     model_path = args.model_id
     model_name = get_model_name_from_path(model_path)
+   
+    model_type = args.model.split("_")[0]
+    
     if model is None:
         tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, model_base=None, model_name=model_name)
         # if args.lora_name != "NONE":
         #     ckpt_path = os.path.join("/ai/teacher/ssz/layer_task/mllms_know/results/ckpts", args.lora_name)
         #     model = PeftModel.from_pretrained(model, ckpt_path, adapter_file="adapter_model.safetensors")
     else:
-        tokenizer, base_model, image_processor, context_len = load_pretrained_model(model_path, model_base=None, model_name=model_name)
-
-    model.eval()
-    
+        tokenizer, base_model, image_processor, context_len = load_pretrained_model(model_path, model_base=None, model_name=model_name, trust_remote_code=True)
     model.to(torch.bfloat16)
     vision_tower = model.get_vision_tower()
     vision_tower.to(dtype=torch.bfloat16)
     image_processor = vision_tower.image_processor
     model.get_model().mm_projector.to(dtype=torch.bfloat16)
     
+    model.eval()
 
+
+    
+    
     dataset = ImageTextDataset(
         task=args.task,
         question_path=args.question_path,

@@ -1857,3 +1857,451 @@
     "time": "2025-06-12d 04:38:58",
     "acc": 61.47986942328618
 }
+{
+    "version": "gqa-0-qwen-1",
+    "epoch": null,
+    "run_time": 546.8105878829956,
+    "time": "2025-07-23d 00:18:36",
+    "acc": 32.5
+}
+{
+    "version": "gqa-1-qwen-1",
+    "epoch": null,
+    "run_time": 563.8796606063843,
+    "time": "2025-07-23d 00:28:21",
+    "acc": 15.0
+}
+{
+    "version": "gqa-2-qwen-1",
+    "epoch": null,
+    "run_time": 3944.178457736969,
+    "time": "2025-07-23d 01:34:29",
+    "acc": 1.5
+}
+{
+    "version": "gqa-3-qwen-1",
+    "epoch": null,
+    "run_time": 4752.423590660095,
+    "time": "2025-07-23d 02:54:04",
+    "acc": 0.0
+}
+{
+    "version": "gqa-4-qwen-1",
+    "epoch": null,
+    "run_time": 2466.5049645900726,
+    "time": "2025-07-23d 03:35:30",
+    "acc": 1.6
+}
+{
+    "version": "gqa-5-qwen-1",
+    "epoch": null,
+    "run_time": 626.5451922416687,
+    "time": "2025-07-23d 03:46:17",
+    "acc": 22.5
+}
+{
+    "version": "gqa-6-qwen-1",
+    "epoch": null,
+    "run_time": 526.7523477077484,
+    "time": "2025-07-23d 03:55:24",
+    "acc": 37.2
+}
+{
+    "version": "gqa-7-qwen-1",
+    "epoch": null,
+    "run_time": 551.5927867889404,
+    "time": "2025-07-23d 04:04:59",
+    "acc": 31.4
+}
+{
+    "version": "gqa-8-qwen-1",
+    "epoch": null,
+    "run_time": 536.5626521110535,
+    "time": "2025-07-23d 04:14:17",
+    "acc": 32.1
+}
+{
+    "version": "gqa-9-qwen-1",
+    "epoch": null,
+    "run_time": 523.7260842323303,
+    "time": "2025-07-23d 04:23:23",
+    "acc": 34.9
+}
+{
+    "version": "gqa-10-qwen-1",
+    "epoch": null,
+    "run_time": 522.8458507061005,
+    "time": "2025-07-23d 04:32:25",
+    "acc": 38.2
+}
+{
+    "version": "gqa-11-qwen-1",
+    "epoch": null,
+    "run_time": 611.6450884342194,
+    "time": "2025-07-23d 04:42:58",
+    "acc": 35.2
+}
+{
+    "version": "gqa-12-qwen-1",
+    "epoch": null,
+    "run_time": 550.9070661067963,
+    "time": "2025-07-23d 04:52:38",
+    "acc": 34.4
+}
+{
+    "version": "gqa-13-qwen-1",
+    "epoch": null,
+    "run_time": 4513.387272834778,
+    "time": "2025-07-23d 06:08:11",
+    "acc": 27.4
+}
+{
+    "version": "gqa-14-qwen-1",
+    "epoch": null,
+    "run_time": 4723.563508749008,
+    "time": "2025-07-23d 07:27:15",
+    "acc": 5.2
+}
+{
+    "version": "gqa-15-qwen-1",
+    "epoch": null,
+    "run_time": 559.9259784221649,
+    "time": "2025-07-23d 07:36:56",
+    "acc": 22.1
+}
+{
+    "version": "gqa-16-qwen-1",
+    "epoch": null,
+    "run_time": 4697.553594589233,
+    "time": "2025-07-23d 08:55:34",
+    "acc": 38.1
+}
+{
+    "version": "gqa-17-qwen-1",
+    "epoch": null,
+    "run_time": 4287.330619335175,
+    "time": "2025-07-23d 10:07:23",
+    "acc": 19.2
+}
+{
+    "version": "gqa-18-qwen-1",
+    "epoch": null,
+    "run_time": 534.3621306419373,
+    "time": "2025-07-23d 10:16:37",
+    "acc": 53.4
+}
+{
+    "version": "gqa-19-qwen-1",
+    "epoch": null,
+    "run_time": 521.7389783859253,
+    "time": "2025-07-23d 10:25:40",
+    "acc": 55.8
+}
+{
+    "version": "gqa-20-qwen-1",
+    "epoch": null,
+    "run_time": 524.0900888442993,
+    "time": "2025-07-23d 10:34:44",
+    "acc": 59.3
+}
+{
+    "version": "gqa-21-qwen-1",
+    "epoch": null,
+    "run_time": 528.9107341766357,
+    "time": "2025-07-23d 10:43:54",
+    "acc": 57.7
+}
+{
+    "version": "gqa-22-qwen-1",
+    "epoch": null,
+    "run_time": 526.2713849544525,
+    "time": "2025-07-23d 10:53:01",
+    "acc": 66.1
+}
+{
+    "version": "gqa-23-qwen-1",
+    "epoch": null,
+    "run_time": 527.2907767295837,
+    "time": "2025-07-23d 11:02:09",
+    "acc": 65.0
+}
+{
+    "version": "gqa-24-qwen-1",
+    "epoch": null,
+    "run_time": 665.6635727882385,
+    "time": "2025-07-23d 11:13:35",
+    "acc": 66.9
+}
+{
+    "version": "gqa-25-qwen-1",
+    "epoch": null,
+    "run_time": 523.1517524719238,
+    "time": "2025-07-23d 11:22:59",
+    "acc": 71.5
+}
+{
+    "version": "gqa-26-qwen-1",
+    "epoch": null,
+    "run_time": 528.3174822330475,
+    "time": "2025-07-23d 11:32:19",
+    "acc": 71.0
+}
+{
+    "version": "gqa-27-qwen-1",
+    "epoch": null,
+    "run_time": 529.1202766895294,
+    "time": "2025-07-23d 11:41:30",
+    "acc": 72.6
+}
+{
+    "version": "gqa-28-qwen-1",
+    "epoch": null,
+    "run_time": 527.0482044219971,
+    "time": "2025-07-23d 11:50:39",
+    "acc": 72.6
+}
+{
+    "version": "gqa-29-qwen-1",
+    "epoch": null,
+    "run_time": 526.7945294380188,
+    "time": "2025-07-23d 11:59:45",
+    "acc": 72.6
+}
+{
+    "version": "gqa-30-qwen-1",
+    "epoch": null,
+    "run_time": 525.6892709732056,
+    "time": "2025-07-23d 12:08:51",
+    "acc": 72.6
+}
+{
+    "version": "gqa-31-qwen-1",
+    "epoch": null,
+    "run_time": 525.8537418842316,
+    "time": "2025-07-23d 12:17:57",
+    "acc": 72.6
+}
+{
+    "version": "vizwiz-0-qwen2-1",
+    "epoch": null,
+    "run_time": 1004.9395179748535,
+    "time": "2025-07-24d 09:54:31",
+    "acc": 5.331882480957563
+}
+{
+    "version": "vizwiz-1-qwen2-1",
+    "epoch": null,
+    "run_time": 3133.4513309001923,
+    "time": "2025-07-24d 10:47:00",
+    "acc": 3.6996735582154514
+}
+{
+    "version": "vizwiz-2-qwen2-1",
+    "epoch": null,
+    "run_time": 3336.4784927368164,
+    "time": "2025-07-24d 11:42:51",
+    "acc": 9.57562568008705
+}
+{
+    "version": "vizwiz-3-qwen2-1",
+    "epoch": null,
+    "run_time": 3450.731296300888,
+    "time": "2025-07-24d 12:40:36",
+    "acc": 0.1088139281828074
+}
+{
+    "version": "vizwiz-4-qwen2-1",
+    "epoch": null,
+    "run_time": 225.09982109069824,
+    "time": "2025-07-24d 12:44:37",
+    "acc": 0.3264417845484222
+}
+{
+    "version": "vizwiz-5-qwen2-1",
+    "epoch": null,
+    "run_time": 834.6225023269653,
+    "time": "2025-07-24d 12:58:46",
+    "acc": 17.6278563656148
+}
+{
+    "version": "vizwiz-6-qwen2-1",
+    "epoch": null,
+    "run_time": 431.20734190940857,
+    "time": "2025-07-24d 13:06:16",
+    "acc": 31.664853101196954
+}
+{
+    "version": "vizwiz-7-qwen2-1",
+    "epoch": null,
+    "run_time": 412.25840187072754,
+    "time": "2025-07-24d 13:13:23",
+    "acc": 27.20348204570185
+}
+{
+    "version": "vizwiz-8-qwen2-1",
+    "epoch": null,
+    "run_time": 367.9596383571625,
+    "time": "2025-07-24d 13:19:47",
+    "acc": 25.571273122959738
+}
+{
+    "version": "vizwiz-9-qwen2-1",
+    "epoch": null,
+    "run_time": 315.7988986968994,
+    "time": "2025-07-24d 13:25:17",
+    "acc": 24.374319912948856
+}
+{
+    "version": "vizwiz-10-qwen2-1",
+    "epoch": null,
+    "run_time": 251.70740962028503,
+    "time": "2025-07-24d 13:29:48",
+    "acc": 24.918389553862895
+}
+{
+    "version": "vizwiz-11-qwen2-1",
+    "epoch": null,
+    "run_time": 1521.8263075351715,
+    "time": "2025-07-24d 13:55:23",
+    "acc": 30.359085963003263
+}
+{
+    "version": "vizwiz-12-qwen2-1",
+    "epoch": null,
+    "run_time": 1010.7988560199738,
+    "time": "2025-07-24d 14:12:27",
+    "acc": 17.08378672470076
+}
+{
+    "version": "vizwiz-13-qwen2-1",
+    "epoch": null,
+    "run_time": 3309.3528282642365,
+    "time": "2025-07-24d 15:07:50",
+    "acc": 11.425462459194778
+}
+{
+    "version": "vizwiz-14-qwen2-1",
+    "epoch": null,
+    "run_time": 3373.119695663452,
+    "time": "2025-07-24d 16:04:19",
+    "acc": 12.622415669205658
+}
+{
+    "version": "vizwiz-15-qwen2-1",
+    "epoch": null,
+    "run_time": 293.93025827407837,
+    "time": "2025-07-24d 16:09:32",
+    "acc": 26.87704026115343
+}
+{
+    "version": "vizwiz-16-qwen2-1",
+    "epoch": null,
+    "run_time": 3439.5225114822388,
+    "time": "2025-07-24d 17:07:06",
+    "acc": 10.337323177366702
+}
+{
+    "version": "vizwiz-17-qwen2-1",
+    "epoch": null,
+    "run_time": 2902.5572283267975,
+    "time": "2025-07-24d 17:55:44",
+    "acc": 2.6115342763873777
+}
+{
+    "version": "vizwiz-18-qwen2-1",
+    "epoch": null,
+    "run_time": 619.3847308158875,
+    "time": "2025-07-24d 18:06:17",
+    "acc": 36.88792165397171
+}
+{
+    "version": "vizwiz-19-qwen2-1",
+    "epoch": null,
+    "run_time": 350.0930645465851,
+    "time": "2025-07-24d 18:12:23",
+    "acc": 51.25136017410229
+}
+{
+    "version": "vizwiz-20-qwen2-1",
+    "epoch": null,
+    "run_time": 491.1676151752472,
+    "time": "2025-07-24d 18:20:49",
+    "acc": 49.183895538628946
+}
+{
+    "version": "vizwiz-21-qwen2-1",
+    "epoch": null,
+    "run_time": 354.449747800827,
+    "time": "2025-07-24d 18:26:59",
+    "acc": 46.354733405875955
+}
+{
+    "version": "vizwiz-22-qwen2-1",
+    "epoch": null,
+    "run_time": 261.4695289134979,
+    "time": "2025-07-24d 18:31:37",
+    "acc": 54.84221980413493
+}
+{
+    "version": "vizwiz-23-qwen2-1",
+    "epoch": null,
+    "run_time": 437.82373905181885,
+    "time": "2025-07-24d 18:39:11",
+    "acc": 61.04461371055495
+}
+{
+    "version": "vizwiz-24-qwen2-1",
+    "epoch": null,
+    "run_time": 2128.0281960964203,
+    "time": "2025-07-24d 19:14:54",
+    "acc": 56.47442872687704
+}
+{
+    "version": "vizwiz-25-qwen2-1",
+    "epoch": null,
+    "run_time": 416.5867848396301,
+    "time": "2025-07-24d 19:22:05",
+    "acc": 66.81175190424375
+}
+{
+    "version": "vizwiz-26-qwen2-1",
+    "epoch": null,
+    "run_time": 686.3547506332397,
+    "time": "2025-07-24d 19:33:46",
+    "acc": 69.31447225244831
+}
+{
+    "version": "vizwiz-27-qwen2-1",
+    "epoch": null,
+    "run_time": 285.645724773407,
+    "time": "2025-07-24d 19:38:46",
+    "acc": 68.22633297062023
+}
+{
+    "version": "vizwiz-28-qwen2-1",
+    "epoch": null,
+    "run_time": 273.9133982658386,
+    "time": "2025-07-24d 19:43:34",
+    "acc": 68.87921653971708
+}
+{
+    "version": "vizwiz-29-qwen2-1",
+    "epoch": null,
+    "run_time": 274.47790122032166,
+    "time": "2025-07-24d 19:48:22",
+    "acc": 68.87921653971708
+}
+{
+    "version": "vizwiz-30-qwen2-1",
+    "epoch": null,
+    "run_time": 274.3037540912628,
+    "time": "2025-07-24d 19:53:10",
+    "acc": 68.87921653971708
+}
+{
+    "version": "vizwiz-31-qwen2-1",
+    "epoch": null,
+    "run_time": 272.68968319892883,
+    "time": "2025-07-24d 19:57:57",
+    "acc": 68.87921653971708
+}
