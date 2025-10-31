@@ -19,23 +19,23 @@ from typing import Optional, Union
 import torch
 from torchvision.transforms.v2 import functional as F
 
-from ...image_processing_utils import (
+from transformers.image_processing_utils import (
     BatchFeature,
 )
-from ...image_processing_utils_fast import (
+from transformers.image_processing_utils_fast import (
     BaseImageProcessorFast,
     group_images_by_shape,
     reorder_images,
 )
-from ...image_utils import (
+from transformers.image_utils import (
     OPENAI_CLIP_MEAN,
     OPENAI_CLIP_STD,
     ImageInput,
     PILImageResampling,
     SizeDict,
 )
-from ...processing_utils import Unpack
-from ...utils import (
+from transformers.processing_utils import Unpack
+from transformers.utils import (
     TensorType,
     auto_docstring,
     logging,

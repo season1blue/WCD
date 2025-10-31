@@ -14,7 +14,7 @@ from methods.utils.get_score import *
 import ipdb
 from datetime import datetime
 import time
-from transformers import GenerationConfig
+from types import SimpleNamespace
 
 def custom_collate_fn(batch):
     batch_out = {}
@@ -24,35 +24,87 @@ def custom_collate_fn(batch):
     return batch_out
 
 
-
-
-
-
 # import
-
+from transformers import AutoModelForCausalLM, AutoTokenizer
 def load_model_and_processor(args, dtype=torch.bfloat16, device_map="auto"):
     model, processor, vision_start_token_id, vision_end_token_id = None, None, None, None
-    if "qwen2" in args.model_id.lower():
+    if "qwen2" == args.model_id.lower():
         from models.qwen2_vl.modeling_qwen2_vl import Qwen2VLForConditionalGeneration
-        from transformers import Qwen2VLForConditionalGeneration
         model = Qwen2VLForConditionalGeneration.from_pretrained(args.model_path, torch_dtype=dtype, device_map=device_map, trust_remote_code=True, attn_implementation="eager").eval()
         processor = AutoProcessor.from_pretrained(args.model_path, trust_remote_code=True)
         tokenizer = processor.tokenizer
         vision_start_token_id = tokenizer.convert_tokens_to_ids("<|vision_start|>")
         vision_end_token_id = tokenizer.convert_tokens_to_ids("<|vision_end|>")
-    elif "llama4" in args.model_id.lower():
-        from models.llama4.modeling_llama4 import Llama4ForConditionalGeneration
-        model = Llama4ForConditionalGeneration.from_pretrained(args.model_path, attn_implementation="flex_attention", device_map="auto",torch_dtype=torch.bfloat16)
-        processor = AutoProcessor.from_pretrained(args.model_path)
-    else:
-        raise ValueError("model is None")
+    elif "qwen2.5" == args.model_id.lower():
+        from models.qwen2_5_vl.modeling_qwen2_5_vl import Qwen2_5_VLForConditionalGeneration
+        from transformers import AutoProcessor
+        model = Qwen2_5_VLForConditionalGeneration.from_pretrained(args.model_path, torch_dtype=dtype, device_map=device_map, trust_remote_code=True, attn_implementation="eager").eval()
+        processor = AutoProcessor.from_pretrained(args.model_path, trust_remote_code=True)
+        tokenizer = processor.tokenizer
+        vision_start_token_id = tokenizer.convert_tokens_to_ids("<|vision_start|>")
+        vision_end_token_id = tokenizer.convert_tokens_to_ids("<|vision_end|>")
+    elif "glm4v" == args.model_id.lower():
+        from models.glm4v.modeling_chatglm import ChatGLMForConditionalGeneration
+        model = ChatGLMForConditionalGeneration.from_pretrained(
+            "THUDM/glm-4v-9b",
+            torch_dtype=torch.bfloat16,
+            low_cpu_mem_usage=True,
+            trust_remote_code=True,
+            device_map=device_map,
+        ).eval()
+        processor = AutoTokenizer.from_pretrained("THUDM/glm-4v-9b", trust_remote_code=True)
+        vision_start_token_id = processor.convert_tokens_to_ids("<|begin_of_image|>")
+        vision_end_token_id = processor.convert_tokens_to_ids("<|end_of_image|>")
+    elif "insblip" == args.model_id.lower():
+        from models.instructblip.modeling_instructblip import InstructBlipForConditionalGeneration
+        from transformers import InstructBlipProcessor
+        
+        model = InstructBlipForConditionalGeneration.from_pretrained(args.model_path, device_map=device_map, trust_remote_code=True).eval()
+        processor = InstructBlipProcessor.from_pretrained(args.model_path, trust_remote_code=True)
+        
+    elif "vipllava" == args.model_id.lower():
+        from models.vipllava.modeling_vipllava import VipLlavaForConditionalGeneration
+        from transformers import AutoProcessor
+        processor = AutoProcessor.from_pretrained("llava-hf/vip-llava-7b-hf", device_map="auto", use_fast=True, num_additional_image_tokens=1)
+        model = VipLlavaForConditionalGeneration.from_pretrained("llava-hf/vip-llava-7b-hf", device_map=device_map).eval()
+        vision_start_token_id = processor.tokenizer.convert_tokens_to_ids('<image>')
+        
+        
+    elif "llavaonevision" == args.model_id.lower():
+        from models.llava_onevision.modeling_llava_onevision import LlavaOnevisionForConditionalGeneration
+        from transformers import AutoProcessor
+        processor = AutoProcessor.from_pretrained("llava-hf/llava-onevision-qwen2-7b-ov-hf") 
+        model = LlavaOnevisionForConditionalGeneration.from_pretrained(
+            "llava-hf/llava-onevision-qwen2-7b-ov-hf",
+            dtype=torch.float16,
+            device_map=device_map,
+        ).eval()
+
+        vision_start_token_id = processor.tokenizer.convert_tokens_to_ids('<image>')
+    elif "vargpt" == args.model_id.lower():
+        from models.vargpt.modeling_vargpt_llava import VARGPTLlavaForConditionalGeneration
+        from models.vargpt.prepare_vargpt_llava import prepare_vargpt_llava 
+        from models.vargpt.processing_vargpt_llava import VARGPTLlavaProcessor
+        from transformers import AutoProcessor, AutoTokenizer
+        # from patching_utils.patching import patching
+
+        prepare_vargpt_llava(args.model_path)
+        model = VARGPTLlavaForConditionalGeneration.from_pretrained(
+            args.model_path, torch_dtype=torch.float32, low_cpu_mem_usage=True).to(0)
+        # patching(model)
+
+        processor = VARGPTLlavaProcessor.from_pretrained(args.model_path)
+
+        
     
     return model, processor, vision_start_token_id, vision_end_token_id
 
 
+
+
 def data_prepare(model_id: str, processor, image: Image.Image, question: str, vision_start_token_id, vision_end_token_id, device):
     pos, pos_end = None, None
-    if "qwen2" in model_id.lower():
+    if "qwen2" == model_id.lower():
         from qwen_vl_utils import process_vision_info
         messages = [
             {
@@ -79,15 +131,92 @@ def data_prepare(model_id: str, processor, image: Image.Image, question: str, vi
         
         pos = inputs['input_ids'].tolist()[0].index(vision_start_token_id) + 1
         pos_end = inputs['input_ids'].tolist()[0].index(vision_end_token_id)
-    
-
-    elif "llama4" in model_id.lower():
+    elif "qwen2.5" == model_id.lower():
+        from qwen_vl_utils import process_vision_info
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image", "image": image, "max_pixels": 512*28*28},  # 本地路径或 PIL.Image
+                    {"type": "text",  "text": f"{question} Answer the question using a single word or phrase."},
+                ],
+            }
+        ]
+            
+        texts = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         
-        inputs = processor(images=image, text=question, return_tensors="pt")
-        pos, pos_end = 0, 1
 
+        image_inputs, video_inputs = process_vision_info(messages)
 
+        inputs = processor(
+            text=[texts],
+            images=image_inputs,
+            videos=video_inputs,
+            padding=True,
+            return_tensors="pt",
+        ).to(device)
+        
+        pos = inputs['input_ids'].tolist()[0].index(vision_start_token_id) + 1
+        pos_end = inputs['input_ids'].tolist()[0].index(vision_end_token_id)
+    elif "glm4v" == model_id.lower():
+        inputs = processor.apply_chat_template([{"role": "user", "image": image, "content": question}], add_generation_prompt=True, tokenize=True, return_tensors="pt",
+                                       return_dict=True).to(device)  # chat mode
+        # inputs = processor(text=[question], images=[image])
+        
+        # pos = inputs['input_ids'].tolist()[0].index(vision_start_token_id) + 1
+        # pos_end = inputs['input_ids'].tolist()[0].index(vision_end_token_id)
+    elif "vipllava" == model_id.lower():
+        prompt = "A chat between a curious human and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the human's questions.###Human: <image>\n{}###Assistant:"
+        prompt = prompt.format(question)
+        inputs = processor(text=prompt, images=image, return_tensors="pt").to(device, torch.float16)
+
+        pos = inputs['input_ids'].tolist()[0].index(vision_start_token_id) + 1
+        pos_end = pos+576 #config中的设置image_seq_length是576
+
+        # inputs = processor(text=question, images=image, return_tensors="pt")
+        # pos = inputs['input_ids'].tolist()[0].index(vision_start_token_id) + 1  # 32000
+        # pos_end = pos+576
+    elif "llavaonevision" == model_id.lower():
+        conversation = [
+            {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": question},
+                {"type": "image"},
+                ],
+            },
+        ]
+        prompt = processor.apply_chat_template(conversation, add_generation_prompt=True)
+        inputs = processor(text=prompt, images=image, return_tensors='pt').to(device)
+
+        positions = (inputs['input_ids'][0] == vision_start_token_id).nonzero(as_tuple=True)[0]
+        if len(positions) > 0:
+            pos = positions[0].item()       # 第一个位置
+            pos_end = positions[-1].item()        # 最后一个位置
+    elif "insblip" == model_id.lower():
+        image = image.convert("RGB")
+        inputs = processor(images=image, text=question, return_tensors="pt").to(device)
+    elif "vargpt" == model_id.lower():
+        conversation = [
+            {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": question},
+                {"type": "image"},
+                ],
+            },
+        ]
+        prompt = processor.apply_chat_template(conversation, add_generation_prompt=True)
+        inputs = processor(images=image, text=prompt, return_tensors='pt').to(0, torch.float32)
+        
+        
+        
+        
     return inputs, pos, pos_end
+
+
+
+
 
 
 
@@ -95,26 +224,6 @@ def data_prepare(model_id: str, processor, image: Image.Image, question: str, vi
 def _eval(args, epoch=None, model=None):
 
     model, processor, vision_start_token_id, vision_end_token_id = load_model_and_processor(args)
-    
-    
-    generation_config = GenerationConfig.from_model_config(model.config)
-    # generation_config.generation_mode = "dola_generation"  # 你可也用枚举或字符串标记
-    generation_config.attn_layer_idx = args.attn_layer_idx
-    generation_config.target_layer_idx = args.target_layer_idx
-    generation_config.mask_ratio = args.mask_ratio
-
-    generation_config.dola_layers = "low"
-    # generation_config.dola_layers = [i for i in range(32)]
-    generation_config.attn_diff = True
-
-    generation_config.output_attentions = True
-    # generation_config.return_dict_in_generate = False
-
-    generation_config.attn_mask = True
-    
-    
-    
-    
     begin_time = time.time()
     
     dataset = ImageTextDataset(
@@ -149,13 +258,16 @@ def _eval(args, epoch=None, model=None):
         image_path = dd["image_path"][0]  # batch_size个图片路径
         image = Image.open(image_path).convert("RGB")
         
-        
         inputs, pos, pos_end = data_prepare(args.model_id, processor, image, question, vision_start_token_id, vision_end_token_id, model.device)
-        generation_config.pos, generation_config.pos_end = pos, pos_end
         
+        mask_config = SimpleNamespace()
+        mask_config.pos, mask_config.pos_end = pos, pos_end
+        mask_config.target_layer = args.target_layer_idx
+        mask_config.mask_ratio = args.mask_ratio
         
-        
-        generated_ids = model.generate(**inputs, generation_config=generation_config, max_new_tokens=128)
+        # generated_ids = model.generate(**inputs, max_new_tokens=128, pad_token_id=processor.tokenizer.eos_token_id)
+        generated_ids = model.generate(**inputs, mask_config=mask_config, max_new_tokens=128)
+        # generated_ids = model.generate(**inputs, max_new_tokens=128)  # 普通生成，测试是否可以跑通
         input_lens = inputs.input_ids.size(1)
         new_tokens = generated_ids[:, input_lens:]
         answers = processor.batch_decode(

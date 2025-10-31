@@ -10,12 +10,13 @@ task_to_image_path = {
     "mvsa_s": "/ai/teacher/ssz/all_data/msa/MVSA_Single/data",
     "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/train_val",
     "docvqa": "/ai/teacher/ssz/all_data/mqa/docvqa",
-    "okvqa": "/ai/teacher/dkc/Assets/OKVQA/val2014",
+    "okvqa": "/ai/teacher/ssz/all_data/mqa/OKVQA/val2014",
     "vizwiz": "/ai/teacher/ssz/all_data/mqa/vizwiz/val",
     "vqav2": "/ai/teacher/ssz/all_data/mqa/VQAv2/val2014",
     # "vqav2": "/ai/teacher/ssz/all_data/mqa/VQAv2/train2014",
     "pope": "./data/pope/images",
     "vstar": "./data/vstar/images",
+    
 }
 
 # eval
@@ -28,7 +29,7 @@ task_to_question_path = {
     "textvqa": "/ai/teacher/ssz/all_data/mqa/TextVQA/processed/val_mix.json",
     "docvqa": "/ai/teacher/ssz/all_data/mqa/docvqa/val_v1.0_withQT.json",
     "vqav2": "/ai/teacher/ssz/all_data/mqa/VQAv2/processed/vqav2val.json",
-    "okvqa": "/ai/teacher/dkc/Assets/OKVQA/processed_datasets/okvqa_val.json",
+    "okvqa": "/ai/teacher/ssz/all_data/mqa/OKVQA/processed_datasets/okvqa_val.json",
     "vizwiz": "/ai/teacher/ssz/all_data/mqa/vizwiz/processed/val.json",
     "pope": "./data/pope/data.json",
     "vstar": "./data/vstar/data.json",
@@ -43,20 +44,29 @@ task_to_train_path = {
     "docvqa": "/ai/teacher/ssz/all_data/mqa/docvqa/train_v1.0_withQT.json",
     "vqav2": "/ai/teacher/ssz/all_data/mqa/VQAv2/processed/vqav2train.json",
     "vizwiz": "/ai/teacher/ssz/all_data/mqa/vizwiz/processed/train.json",
-    "okvqa": "/ai/teacher/dkc/Assets/OKVQA/processed_datasets/okvqa_train.json"
+    "okvqa": "/ai/teacher/ssz/all_data/mqa/OKVQA/processed_datasets/okvqa_train.json"
 }
 
 model_to_fullname = {
     "llava": "llava-hf/llava-1.5-7b-hf",
     "blip": "Salesforce/instructblip-vicuna-7b",
-    "qwen2_5": "Qwen/Qwen2.5-VL-3B-Instruct",
     "llava_new_7": "liuhaotian/llava-v1.5-7b",
     "llava_new_13": "liuhaotian/llava-v1.5-13b",
     "llava_new_1.6_7": "liuhaotian/llava-v1.6-vicuna-7b",
     "qwen2": "Qwen/Qwen2-VL-7B-Instruct",
     "qwen2.5":"Qwen/Qwen2.5-VL-7B-Instruct",
-    "llama4": "meta-llama/Llama-4-Scout-17B-16E-Instruct"
+    "llama4": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+    "llama3": "meta-llama/Llama-3.2-3B-Instruct",
+    "glm4v": "THUDM/glm-4v-9b",
+    "phi4": "microsoft/Phi-4-multimodal-instruct",
+    "insblip": "Salesforce/instructblip-vicuna-7b",
+    "vipllava": "llava-hf/vip-llava-7b-hf",
+    "llavaonevision": "none",
+    "llama": "none",
+    "vargpt": "VARGPT-family/VARGPT_LLaVA-v1"
 }
+
+
 
 def load_args():
     parser = argparse.ArgumentParser()

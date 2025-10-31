@@ -29,15 +29,14 @@ def custom_collate_fn(batch):
 
 
 
-from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
-from llava.conversation import conv_templates, SeparatorStyle
-from llava.model.builder import load_pretrained_model
-from llava.utils import disable_torch_init
-from llava.mm_utils import tokenizer_image_token, process_images, get_model_name_from_path
+from models.llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
+from models.llava.conversation import conv_templates, SeparatorStyle
+from models.llava.model.builder import load_pretrained_model
+from models.llava.utils import disable_torch_init
+from models.llava.mm_utils import tokenizer_image_token, process_images, get_model_name_from_path
 
 from transformers import GenerationConfig
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from qwen.qwen2_vl.modeling_qwen2_vl import Qwen2VLForConditionalGeneration
 
 def _eval(args, epoch=None, model=None):
 

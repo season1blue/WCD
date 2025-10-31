@@ -19,13 +19,13 @@ from typing import Optional, Union
 
 import numpy as np
 
-from ...image_processing_utils import BaseImageProcessor, BatchFeature
-from ...image_transforms import (
+from transformers.image_processing_utils import BaseImageProcessor, BatchFeature
+from transformers.image_transforms import (
     convert_to_rgb,
     resize,
     to_channel_dimension_format,
 )
-from ...image_utils import (
+from transformers.image_utils import (
     OPENAI_CLIP_MEAN,
     OPENAI_CLIP_STD,
     ChannelDimension,
@@ -39,9 +39,9 @@ from ...image_utils import (
     valid_images,
     validate_preprocess_arguments,
 )
-from ...processing_utils import ImagesKwargs
-from ...utils import TensorType, logging
-from ...video_utils import VideoInput
+from transformers.processing_utils import ImagesKwargs
+from transformers.utils import TensorType, logging
+from transformers.video_utils import VideoInput
 
 
 logger = logging.get_logger(__name__)

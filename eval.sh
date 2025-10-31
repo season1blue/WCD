@@ -15,12 +15,13 @@ echo "Selected GPU $CUDA_VISIBLE_DEVICES"
 
 
 # llava_new_1.6_7
-model="llama4"
+model="insblip"
 method="rel_att"
 max_sample=1000
 batch_size=1
-attn_layer_idx=17
+attn_layer_idx=0
 result_path="result_${CUDA_VISIBLE_DEVICES}.json"
+
 
 # timestamp=$(date +%Y%m%d_%H%M%S)
 # tmp_py="tmp_eval_${timestamp}.py"
@@ -31,16 +32,18 @@ result_path="result_${CUDA_VISIBLE_DEVICES}.json"
 mask_ratio=1
 # 1 2 32 33 34 35 36 37 38 39
 
-log_output=false
-for task in docvqa
+log_output=true
+for task in gqa vqav2 okvqa vizwiz textvqa docvqa 
     do
-    for target_layer_idx in 29
+    # for target_layer_idx in {1..31}
+    for target_layer_idx in 0
     # for ((target_layer_idx=31; target_layer_idx>=0; target_layer_idx--))
     do
         lora_name=$task-$target_layer_idx-$model-$mask_ratio
-        log_path="log/qwen/log_$task.log"
+        log_path="log/$model/log_pure_$task.log"
+        mkdir -p "$(dirname "$log_path")"
 
-        cmd="python _main.py  --model $model --task $task  --max_sample $max_sample --lora_name $lora_name --batch_size $batch_size --attn_layer_idx $attn_layer_idx --target_layer_idx $target_layer_idx --result_path $result_path --mask_ratio $mask_ratio "
+        cmd="python _pure.py  --model $model --task $task  --max_sample $max_sample --lora_name $lora_name --batch_size $batch_size --attn_layer_idx $attn_layer_idx --target_layer_idx $target_layer_idx --result_path $result_path --mask_ratio $mask_ratio "
 
         if [ "$log_output" = true ]; then
             echo "Running target_layer_idx=$target_layer_idx" >> "$log_path"

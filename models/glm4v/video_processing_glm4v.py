@@ -20,8 +20,8 @@ from typing import Optional, Union
 import numpy as np
 import torch
 
-from ...image_processing_utils import BatchFeature
-from ...image_utils import (
+from transformers.image_processing_utils import BatchFeature
+from transformers.image_utils import (
     OPENAI_CLIP_MEAN,
     OPENAI_CLIP_STD,
     ChannelDimension,
@@ -29,10 +29,10 @@ from ...image_utils import (
     SizeDict,
     get_image_size,
 )
-from ...processing_utils import Unpack, VideosKwargs
-from ...utils import TensorType, add_start_docstrings
-from ...video_processing_utils import BASE_VIDEO_PROCESSOR_DOCSTRING, BaseVideoProcessor
-from ...video_utils import VideoMetadata, group_videos_by_shape, reorder_videos
+from transformers.processing_utils import Unpack, VideosKwargs
+from transformers.utils import TensorType, add_start_docstrings
+from transformers.video_processing_utils import BASE_VIDEO_PROCESSOR_DOCSTRING, BaseVideoProcessor
+from transformers.video_utils import VideoMetadata, group_videos_by_shape, reorder_videos
 from .image_processing_glm4v import smart_resize
 
 

@@ -25,7 +25,7 @@ from typing import Optional
 import torch
 from safetensors.torch import save_file
 
-from ...utils import strtobool
+from transformers.utils import strtobool
 
 
 # Avoid Using Megatron Lib
