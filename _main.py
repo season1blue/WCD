@@ -17,7 +17,8 @@ import time
 from types import SimpleNamespace
 
 # from methods.decoding_method import _dola_decoding
-from methods.dola import _dola_decoding
+from methods.dola import _dola_decoding  # 原始dola，通过参数传递
+from methods.wave_cd import _wave_decoding # 修改后的，使用小波变换的图像作为图像基底，从而迫使图像关注细节
 
 def custom_collate_fn(batch):
     batch_out = {}
