@@ -1,40 +1,0 @@
-Running target_layer_idx=29
-Executing: python tmp_eval_20250527_154501.py  --model llava_new --task vqav2  --max_sample 1000 --lora_name vqav2-29-0.0-2mpl --batch_size 1 --attn_layer_idx 17 --target_layer_idx 29 --result_path result_1.json --mask_ratio 0.0 
-You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:01<00:01,  1.39s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:01<00:00,  1.15it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:01<00:00,  1.05it/s]
-Processing:   0%|                                                          | 0/1000 [00:00<?, ?it/s]/ai/teacher/ssz/layer_task/transformers/src/transformers/generation/configuration_utils.py:788: UserWarning: `return_dict_in_generate` is NOT set to `True`, but `output_attentions` is. When `return_dict_in_generate` is not `True`, `output_attentions` is ignored.
-  warnings.warn(
-LlamaModel is using LlamaSdpaAttention, but `torch.nn.functional.scaled_dot_product_attention` does not support `output_attentions=True`. Falling back to the manual attention implementation, but specifying the manual implementation will be required from Transformers version v5.0.0 onwards. This warning can be removed using the argument `attn_implementation="eager"` when loading the model.
-Processing:   0%|                                                          | 0/1000 [00:00<?, ?it/s]
-Traceback (most recent call last):
-  File "/ai/teacher/ssz/layer_task/mllms_know_copy/tmp_eval_20250527_154501.py", line 252, in <module>
-    _eval(args)
-  File "/ai/teacher/ssz/layer_task/mllms_know_copy/tmp_eval_20250527_154501.py", line 184, in _eval
-    output_ids = model.generate(
-  File "/root/miniconda3/envs/mllms/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
-    return func(*args, **kwargs)
-  File "/ai/teacher/ssz/layer_task/mllms_know_copy/llava/model/language_model/llava_llama.py", line 151, in generate
-    return super().generate(
-  File "/root/miniconda3/envs/mllms/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
-    return func(*args, **kwargs)
-  File "/ai/teacher/ssz/layer_task/mllms_know_copy/llava/model/language_model/generate.py", line 2082, in generate
-    result = self._dola_decoding(
-  File "/ai/teacher/ssz/layer_task/mllms_know_copy/llava/model/language_model/generate.py", line 2548, in _dola_decoding
-    outputs = self(
-  File "/root/miniconda3/envs/mllms/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/root/miniconda3/envs/mllms/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/ai/teacher/ssz/layer_task/mllms_know_copy/llava/model/language_model/llava_llama.py", line 97, in forward
-    return super().forward(
-  File "/ai/teacher/ssz/layer_task/mllms_know_copy/llava/model/language_model/base_llama.py", line 550, in forward
-    outputs = self.model(
-  File "/root/miniconda3/envs/mllms/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/root/miniconda3/envs/mllms/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/ai/teacher/ssz/layer_task/mllms_know_copy/llava/model/language_model/base_llama.py", line 312, in forward
-    masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), max_jsd_diff, image_start_pos=generation_config.image_start_pos, mask_ratio=generation_config.mask_ratio, mask_scale=1e-9)
-  File "/ai/teacher/ssz/layer_task/mllms_know_copy/llava/model/language_model/base_llama.py", line 179, in apply_soft_mask_to_image_embeds
-    threshold = torch.topk(attn_flat, k=num_mask, largest=False).values[-1]
-IndexError: index -1 is out of bounds for dimension 0 with size 0

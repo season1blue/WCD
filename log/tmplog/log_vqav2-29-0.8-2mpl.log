@@ -1,3 +1,0 @@
-Running target_layer_idx=29
-Executing: python tmp_eval_20250527_154501.py  --model llava_new --task vqav2  --max_sample 1000 --lora_name vqav2-29-0.8-2mpl --batch_size 1 --attn_layer_idx 17 --target_layer_idx 29 --result_path result_1.json --mask_ratio 0.8 
-python: can't open file '/ai/teacher/ssz/layer_task/mllms_know_copy/tmp_eval_20250527_154501.py': [Errno 2] No such file or directory
