@@ -47,22 +47,23 @@ task_to_train_path = {
 }
 
 model_to_fullname = {
-    "llava": "llava-hf/llava-1.5-7b-hf",
-    "blip": "Salesforce/instructblip-vicuna-7b",
     "llava_new_7": "liuhaotian/llava-v1.5-7b",
     "llava_new_13": "liuhaotian/llava-v1.5-13b",
     "llava_new_1.6_7": "liuhaotian/llava-v1.6-vicuna-7b",
     "qwen2": "Qwen/Qwen2-VL-7B-Instruct",
     "qwen2.5":"Qwen/Qwen2.5-VL-7B-Instruct",
-    "llama4": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+    "llavaonevision": "none",
+    "insblip": "Salesforce/instructblip-vicuna-7b",
+    "vipllava": "llava-hf/vip-llava-7b-hf",
+    # 
+    "llava": "llava-hf/llava-1.5-7b-hf",
+    "blip": "Salesforce/instructblip-vicuna-7b",
     "llama3": "meta-llama/Llama-3.2-3B-Instruct",
     "glm4v": "THUDM/glm-4v-9b",
     "phi4": "microsoft/Phi-4-multimodal-instruct",
-    "insblip": "Salesforce/instructblip-vicuna-7b",
-    "vipllava": "llava-hf/vip-llava-7b-hf",
-    "llavaonevision": "none",
     "llama": "none",
-    "vargpt": "VARGPT-family/VARGPT_LLaVA-v1"
+    "vargpt": "VARGPT-family/VARGPT_LLaVA-v1",
+    "llama4": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
 }
 
 

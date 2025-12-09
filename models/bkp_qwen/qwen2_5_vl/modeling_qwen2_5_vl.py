@@ -34,7 +34,8 @@ import torch.nn.functional as F
 
 from transformers.activations import ACT2FN
 from transformers.cache_utils import Cache, DynamicCache
-from transformers.generation import GenerationMixin
+# from transformers.generation import GenerationMixin
+from ..generate import MyGenerationMixin
 from transformers.masking_utils import create_causal_mask, create_sliding_window_causal_mask
 from transformers.modeling_flash_attention_utils import FlashAttentionKwargs
 from transformers.modeling_layers import GradientCheckpointingLayer
@@ -46,9 +47,51 @@ from transformers.utils import TransformersKwargs, auto_docstring, can_return_tu
 from .modeling_qwen2 import Qwen2RMSNorm
 from .configuration_qwen2_5_vl import Qwen2_5_VLConfig, Qwen2_5_VLTextConfig, Qwen2_5_VLVisionConfig
 
-from ..generate import MyGenerationMixin
 
 logger = logging.get_logger(__name__)
+
+
+import numpy as np
+def apply_soft_mask_to_image_embeds(inputs_embeds, attn=None, generation_config=None, mask_scale=0.0):
+    """
+    Apply soft masking to image embeddings in inputs_embeds.
+
+    inputs_embeds: (1, seq_len, dim)
+    attn: Optional (24, 24) attention scores. If None, apply mask to all image patches.
+    image_start_pos: Index where image tokens start.
+    mask_ratio: Only used if attn is provided; fraction of low-attn patches to mask.
+    mask_scale: Scaling factor for masked tokens (soft mask: 0.0 = full mask, 1.0 = no mask).
+    """
+    mask_ratio = generation_config.mask_ratio
+    image_start_pos = generation_config.pos
+    image_end_pos = generation_config.pos_end
+    
+    if attn is not None:
+        if isinstance(attn, np.ndarray):
+            attn = torch.tensor(attn, dtype=torch.float32, device=inputs_embeds.device)
+        elif isinstance(attn, torch.Tensor) and attn.device != inputs_embeds.device:
+            attn = attn.to(inputs_embeds.device)
+
+        attn_flat = attn.flatten()
+        num_mask = int(mask_ratio * len(attn_flat))
+
+        if num_mask == 0:
+            soft_mask = torch.ones_like(attn_flat)
+        else:
+            threshold = torch.topk(attn_flat, k=num_mask, largest=False).values[-1]
+            keep_mask = (attn_flat > threshold).float()
+            soft_mask = keep_mask + (1 - keep_mask) * mask_scale
+
+        image_embeds = inputs_embeds[0, image_start_pos:image_end_pos, :]  # (576, dim)
+        image_embeds_masked = image_embeds * soft_mask.unsqueeze(-1)  # (576, dim)
+        
+        inputs_embeds[0, image_start_pos:image_end_pos, :] = image_embeds_masked
+    else:
+        # No attention provided: mask all image tokens with uniform soft mask
+        soft_mask = torch.full((image_end_pos-image_start_pos,), fill_value=mask_scale, device=inputs_embeds.device)
+        inputs_embeds[:, image_start_pos:image_end_pos, :] = 0
+
+    return inputs_embeds
 
 
 class Qwen2_5_VLMLP(nn.Module):
@@ -763,7 +806,7 @@ class Qwen2_5_VLDecoderLayer(GradientCheckpointingLayer):
 
         return outputs
 
-
+import ipdb
 @auto_docstring
 class Qwen2_5_VLTextModel(Qwen2_5_VLPreTrainedModel):
     config: Qwen2_5_VLTextConfig
@@ -798,6 +841,7 @@ class Qwen2_5_VLTextModel(Qwen2_5_VLPreTrainedModel):
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
+        mask_config = None,
         cache_position: Optional[torch.LongTensor] = None,
         **kwargs: Unpack[FlashAttentionKwargs],
     ) -> Union[tuple, BaseModelOutputWithPast]:
@@ -883,10 +927,14 @@ class Qwen2_5_VLTextModel(Qwen2_5_VLPreTrainedModel):
         all_hidden_states = () if output_hidden_states else None
         all_self_attns = () if output_attentions else None
 
-        for decoder_layer in self.layers:
+        for layer_idx, decoder_layer in enumerate(self.layers) :
             if output_hidden_states:
                 all_hidden_states += (hidden_states,)
 
+            if layer_idx == mask_config.target_layer:
+                masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), None, mask_config, mask_scale=1e-9)
+                hidden_states = masked_hidden_states
+            
             layer_outputs = decoder_layer(
                 hidden_states,
                 attention_mask=causal_mask_mapping[decoder_layer.attention_type],
@@ -1230,6 +1278,7 @@ class Qwen2_5_VLModel(Qwen2_5_VLPreTrainedModel):
         rope_deltas: Optional[torch.LongTensor] = None,
         cache_position: Optional[torch.LongTensor] = None,
         second_per_grid_ts: Optional[torch.Tensor] = None,
+        mask_config = None,
         **kwargs: Unpack[TransformersKwargs],
     ) -> Union[tuple, Qwen2_5_VLModelOutputWithPast]:
         r"""
@@ -1242,7 +1291,6 @@ class Qwen2_5_VLModel(Qwen2_5_VLPreTrainedModel):
         second_per_grid_ts (`torch.Tensor` of shape `(num_videos)`, *optional*):
             The time interval (in seconds) for each grid along the temporal dimension in the 3D position IDs.
         """
-
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_hidden_states = (
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
@@ -1300,6 +1348,7 @@ class Qwen2_5_VLModel(Qwen2_5_VLPreTrainedModel):
             output_hidden_states=output_hidden_states,
             return_dict=True,
             cache_position=cache_position,
+            mask_config=mask_config,
             **kwargs,
         )
 
@@ -1408,6 +1457,7 @@ class Qwen2_5_VLForConditionalGeneration(MyGenerationMixin, Qwen2_5_VLPreTrained
         cache_position: Optional[torch.LongTensor] = None,
         second_per_grid_ts: Optional[torch.Tensor] = None,
         logits_to_keep: Union[int, torch.Tensor] = 0,
+        mask_config = None,
         **kwargs: Unpack[TransformersKwargs],
     ) -> Union[tuple, Qwen2_5_VLCausalLMOutputWithPast]:
         r"""
@@ -1476,6 +1526,7 @@ class Qwen2_5_VLForConditionalGeneration(MyGenerationMixin, Qwen2_5_VLPreTrained
             output_hidden_states=output_hidden_states,
             return_dict=True,
             cache_position=cache_position,
+            mask_config=mask_config,
             **kwargs,
         )
 

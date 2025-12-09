@@ -15,7 +15,7 @@ echo "Selected GPU $CUDA_VISIBLE_DEVICES"
 
 
 # llava_new_1.6_7
-model="llava_new_1.6_7"
+model="qwen2.5"
 method="rel_att"
 max_sample=1000
 batch_size=1
@@ -43,7 +43,7 @@ for task in textvqa
         log_path="log/$model/log_$task.log"
         mkdir -p "$(dirname "$log_path")"
 
-        cmd="python _eval_llava.py  --model $model --task $task  --max_sample $max_sample --lora_name $lora_name --batch_size $batch_size --attn_layer_idx $attn_layer_idx --target_layer_idx $target_layer_idx --result_path $result_path --mask_ratio $mask_ratio "
+        cmd="python _main.py  --model $model --task $task  --max_sample $max_sample --lora_name $lora_name --batch_size $batch_size --attn_layer_idx $attn_layer_idx --target_layer_idx $target_layer_idx --result_path $result_path --mask_ratio $mask_ratio "
 
         if [ "$log_output" = true ]; then
             echo "Running target_layer_idx=$target_layer_idx" >> "$log_path"
