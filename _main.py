@@ -16,6 +16,9 @@ from datetime import datetime
 import time
 from types import SimpleNamespace
 
+# from methods.decoding_method import _dola_decoding
+from methods.dola import _dola_decoding
+
 def custom_collate_fn(batch):
     batch_out = {}
     for key in batch[0]:
@@ -219,9 +222,6 @@ def data_prepare(model_id: str, processor, image: Image.Image, question: str, vi
 
 
 
-def custom():
-    return 1
-
 def _eval(args, epoch=None, model=None):
 
     model, processor, vision_start_token_id, vision_end_token_id = load_model_and_processor(args)
@@ -267,7 +267,7 @@ def _eval(args, epoch=None, model=None):
         mask_config.mask_ratio = args.mask_ratio
         
         # generated_ids = model.generate(**inputs, max_new_tokens=128, pad_token_id=processor.tokenizer.eos_token_id)
-        generated_ids = model.generate(**inputs, mask_config=mask_config, max_new_tokens=128, custom_generate=custom)
+        generated_ids = model.generate(**inputs, mask_config=mask_config, max_new_tokens=128, custom_generate=_dola_decoding)
         # generated_ids = model.generate(**inputs, max_new_tokens=128)  # 普通生成，测试是否可以跑通
         input_lens = inputs.input_ids.size(1)
         new_tokens = generated_ids[:, input_lens:]

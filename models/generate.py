@@ -2406,7 +2406,7 @@ class MyGenerationMixin(ContinuousMixin):
         )
         generation_mode = generation_config.get_generation_mode(assistant_model)
 
-        ipdb.set_trace()
+        # ipdb.set_trace()
         if isinstance(custom_generate, Callable):
             decoding_method = custom_generate
         else:
