@@ -1,2 +1,5 @@
 nohup: ignoring input
-Selected GPU 3
+Selected GPU 0
+eval.sh: line 63: e: command not found
+eval.sh: line 64: syntax error near unexpected token `done'
+eval.sh: line 64: `done'

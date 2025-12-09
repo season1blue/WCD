@@ -643,6 +643,7 @@ class LlamaModel(LlamaPreTrainedModel):
 
         for layer_idx, decoder_layer in enumerate(self.layers[: self.config.num_hidden_layers]):
             if mask_config is not None:
+                # ipdb.set_trace()
                 if layer_idx == mask_config.target_layer:
                     masked_hidden_states = apply_soft_mask_to_image_embeds(hidden_states.clone(), None, mask_config, mask_scale=1e-9)
                     hidden_states = masked_hidden_states

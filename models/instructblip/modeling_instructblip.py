@@ -1438,6 +1438,7 @@ class InstructBlipForConditionalGeneration(MyGenerationMixin, InstructBlipPreTra
             attention_mask = torch.ones_like(input_ids)
 
         language_model_inputs = language_model_inputs.to(inputs_embeds.device, inputs_embeds.dtype)
+        
         special_image_mask = self.get_placeholder_mask(input_ids, inputs_embeds=inputs_embeds)
         inputs_embeds = inputs_embeds.masked_scatter(special_image_mask, language_model_inputs)
 

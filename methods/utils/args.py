@@ -13,7 +13,6 @@ task_to_image_path = {
     "okvqa": "/ai/teacher/ssz/all_data/mqa/OKVQA/val2014",
     "vizwiz": "/ai/teacher/ssz/all_data/mqa/vizwiz/val",
     "vqav2": "/ai/teacher/ssz/all_data/mqa/VQAv2/val2014",
-    # "vqav2": "/ai/teacher/ssz/all_data/mqa/VQAv2/train2014",
     "pope": "./data/pope/images",
     "vstar": "./data/vstar/images",
     

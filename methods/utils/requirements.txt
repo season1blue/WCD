@@ -39,7 +39,8 @@ watchfiles==0.24.0
 webcolors==24.8.0
 wheel==0.45.1
 # transformers==4.37.2
-transformers=5.0.0.dev0
+transformers=5.0.0.dev0  # llavaonevision
+#transformers=4.46.3 for qwen2 qwen2.5
 qwen-vl-utils
 peft==0.10.0
 ipdb
